@@ -10,6 +10,7 @@ import { bip321 } from './utils/bip-321'
 import { BITCOIN_ADDRESS_PREFIXES, bitcoin } from './utils/bitcoin'
 import { bolt11 } from './utils/bolt11'
 import { bolt12 } from './utils/bolt12'
+import { lightningAddress } from './utils/lightning-address'
 import { getNetwork } from './utils/network'
 
 const BIP321_PREFIX = 'bitcoin:'
@@ -60,6 +61,18 @@ function decodeBolt12(input: Input, offer: Input): SuccessPayload {
     destinations: [destination],
     network: getNetwork(offer) || ' unknown',
     metadata: parsedDestination.metadata
+  }
+}
+
+function decodeLightningAddress(input: Input): SuccessPayload {
+  const parsedDestination = lightningAddress(input)
+  const destination = toDestination(parsedDestination.destination)
+
+  return {
+    input,
+    destination,
+    destinations: [destination],
+    network: ' unknown'
   }
 }
 
@@ -135,6 +148,10 @@ function decodeInput(input: Input): SuccessPayload {
     return decodeArk(input)
   }
 
+  if (input.includes('@')) {
+    return decodeLightningAddress(input)
+  }
+
   if (
     BITCOIN_ADDRESS_PREFIXES.some((prefix) => lowerInput.startsWith(prefix))
   ) {
@@ -171,5 +188,13 @@ function decode(input: Input): DecodedData {
 }
 
 export { decode }
-export type { DecodedData, Destination, Metadata, Network } from './types'
+export type {
+  DecodedData,
+  Destination,
+  Metadata,
+  Network,
+  ParsedLNAddress,
+  WellKnown
+} from './types'
+export { wellKnown } from './utils/lightning-address'
 export default { decode }

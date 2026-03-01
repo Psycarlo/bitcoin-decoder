@@ -46,7 +46,21 @@ export type ErrorCode =
   | 'INVALID_CHECKSUM'
   | 'INVALID_BOLT12'
   | 'INVALID_BIP321'
+  | 'INVALID_LNADDRESS'
   | 'NO_PAYMENT_METHODS'
+
+export type ParsedLNAddress = {
+  username: string
+  domain: string
+}
+
+export type WellKnown = {
+  callback: string
+  minSendable: number
+  maxSendable: number
+  commentAllowed?: number
+  metadata?: string
+}
 
 type DecodedSuccess = {
   valid: true

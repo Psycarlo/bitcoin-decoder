@@ -1,8 +1,9 @@
 // @ts-nocheck
 import { describe, expect, it } from 'bun:test'
-import { decode } from '../src'
+import { decode, wellKnown } from '../src'
 import { ArkAddresses } from './fixtures/ark'
 import { bitcoinAddresses } from './fixtures/bitcoin'
+import { lightningAddresses } from './fixtures/lightning-address'
 
 describe('Bitcoin Decode', () => {
   describe('Bolt11', () => {
@@ -62,7 +63,95 @@ describe('Bitcoin Decode', () => {
     })
   })
 
-  // describe('Lightning addresses', () => {})
+  describe('Lightning addresses', () => {
+    describe('decode', () => {
+      it('should decode a valid lightning address (medusa)', () => {
+        const input = lightningAddresses.valid.medusa
+        const result = decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.destination).toBe(input)
+        expect(result.destination.type).toBe('lnaddress')
+        expect(result.destination.protocol).toBe('lightning')
+      })
+
+      it('should decode a valid lightning address (wos)', () => {
+        const input = lightningAddresses.valid.wos
+        const result = decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.destination).toBe(input)
+        expect(result.destination.type).toBe('lnaddress')
+        expect(result.destination.protocol).toBe('lightning')
+      })
+
+      it('should return invalid for a lightning address without domain', () => {
+        const result = decode('user@')
+
+        expect(result.valid).toBe(false)
+        if (result.valid) {
+          return
+        }
+        expect(result.errorCode).toBe('INVALID_LNADDRESS')
+      })
+
+      it('should return invalid for a lightning address without TLD', () => {
+        const result = decode('user@domain')
+
+        expect(result.valid).toBe(false)
+        if (result.valid) {
+          return
+        }
+        expect(result.errorCode).toBe('INVALID_LNADDRESS')
+      })
+    })
+
+    describe('wellKnown', () => {
+      it('should resolve a valid medusa lightning address', async () => {
+        const result = await wellKnown(lightningAddresses.valid.medusa)
+
+        expect(result).not.toBe(false)
+        if (!result) {
+          return
+        }
+        expect(result.callback).toBeDefined()
+        expect(result.minSendable).toBeDefined()
+        expect(result.maxSendable).toBeDefined()
+      })
+
+      it('should resolve a valid wos lightning address', async () => {
+        const result = await wellKnown(lightningAddresses.valid.wos)
+
+        expect(result).not.toBe(false)
+        if (!result) {
+          return
+        }
+        expect(result.callback).toBeDefined()
+        expect(result.minSendable).toBeDefined()
+        expect(result.maxSendable).toBeDefined()
+      })
+
+      it('should return false for an invalid medusa lightning address', async () => {
+        const result = await wellKnown(lightningAddresses.invalid.medusa)
+
+        expect(result).toBe(false)
+      })
+
+      it('should return false for an invalid wos lightning address', async () => {
+        const result = await wellKnown(lightningAddresses.invalid.wos)
+
+        expect(result).toBe(false)
+      })
+    })
+  })
 
   describe('Payment request', () => {
     it('should decode a lightning: prefixed bolt11 invoice', () => {
