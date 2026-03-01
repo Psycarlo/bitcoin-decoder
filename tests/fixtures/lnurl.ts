@@ -1,0 +1,6 @@
+export const lnurls = {
+  valid: {
+    medusa:
+      'LNURL1DP68GURN8GHJ7AMPD3KX2APWD4JKGATNVYHXY730D3H82UNVWQHNJ6Z5VFVHS7YRG52'
+  }
+}

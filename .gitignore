@@ -1,0 +1,10 @@
+# dependencies
+node_modules
+
+# output
+out
+dist
+*.tgz
+
+# claude
+.claude/settings.local.json
