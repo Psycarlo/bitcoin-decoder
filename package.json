@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Decode bitcoin QR codes, URIs, and raw strings",
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "author": {
     "name": "psycarlo",
     "email": "psycarlo1@gmail.com",

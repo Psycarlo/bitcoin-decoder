@@ -171,4 +171,5 @@ function decode(input: Input): DecodedData {
 }
 
 export { decode }
+export type { DecodedData, Destination, Metadata, Network } from './types'
 export default { decode }
