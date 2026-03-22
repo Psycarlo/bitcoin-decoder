@@ -4,7 +4,7 @@ export type Input = string
  *
  *  `testnet` here includes bitcoin testnet, signet, and regtest.
  */
-export type Network = 'mainnet' | 'testnet' | ' unknown'
+export type Network = 'mainnet' | 'testnet' | 'unknown'
 
 export type Protocol = 'on-chain' | 'lightning' | 'ark'
 
@@ -47,6 +47,7 @@ export type ErrorCode =
   | 'INVALID_BOLT12'
   | 'INVALID_BIP321'
   | 'INVALID_LNADDRESS'
+  | 'INVALID_LNURL'
   | 'NO_PAYMENT_METHODS'
 
 export type ParsedLNAddress = {

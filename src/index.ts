@@ -11,6 +11,7 @@ import { BITCOIN_ADDRESS_PREFIXES, bitcoin } from './utils/bitcoin'
 import { bolt11 } from './utils/bolt11'
 import { bolt12 } from './utils/bolt12'
 import { lightningAddress } from './utils/lightning-address'
+import { LNURL_PREFIX, lnurl } from './utils/lnurl'
 import { getNetwork } from './utils/network'
 
 const BIP321_PREFIX = 'bitcoin:'
@@ -46,7 +47,7 @@ function decodeBolt11(input: Input, invoice: Input): SuccessPayload {
     input,
     destination,
     destinations: [destination],
-    network: getNetwork(invoice) || ' unknown',
+    network: getNetwork(invoice) || 'unknown',
     metadata: parsedDestination.metadata
   }
 }
@@ -59,7 +60,7 @@ function decodeBolt12(input: Input, offer: Input): SuccessPayload {
     input,
     destination,
     destinations: [destination],
-    network: getNetwork(offer) || ' unknown',
+    network: getNetwork(offer) || 'unknown',
     metadata: parsedDestination.metadata
   }
 }
@@ -72,7 +73,19 @@ function decodeLightningAddress(input: Input): SuccessPayload {
     input,
     destination,
     destinations: [destination],
-    network: ' unknown'
+    network: 'unknown'
+  }
+}
+
+function decodeLnurl(input: Input): SuccessPayload {
+  const parsedDestination = lnurl(input)
+  const destination = toDestination(parsedDestination.destination)
+
+  return {
+    input,
+    destination,
+    destinations: [destination],
+    network: 'unknown'
   }
 }
 
@@ -84,7 +97,7 @@ function decodeArk(input: Input): SuccessPayload {
     input,
     destination,
     destinations: [destination],
-    network: getNetwork(input) || ' unknown'
+    network: getNetwork(input) || 'unknown'
   }
 }
 
@@ -108,7 +121,7 @@ function decodeBip321(input: Input): SuccessPayload {
     input,
     destination,
     destinations,
-    network: getNetwork(destination.destination) || ' unknown',
+    network: getNetwork(destination.destination) || 'unknown',
     metadata: first.metadata
   }
 }
@@ -121,7 +134,7 @@ function decodeBitcoin(input: Input): SuccessPayload {
     input,
     destination,
     destinations: [destination],
-    network: getNetwork(input) || ' unknown'
+    network: getNetwork(input) || 'unknown'
   }
 }
 
@@ -142,6 +155,10 @@ function decodeInput(input: Input): SuccessPayload {
 
   if (BOLT12_PREFIXES.some((prefix) => lowerInput.startsWith(prefix))) {
     return decodeBolt12(input, input)
+  }
+
+  if (lowerInput.startsWith(LNURL_PREFIX)) {
+    return decodeLnurl(input)
   }
 
   if (ARK_PREFIXES.some((prefix) => lowerInput.startsWith(prefix))) {

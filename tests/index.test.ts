@@ -4,6 +4,7 @@ import { decode, wellKnown } from '../src'
 import { ArkAddresses } from './fixtures/ark'
 import { bitcoinAddresses } from './fixtures/bitcoin'
 import { lightningAddresses } from './fixtures/lightning-address'
+import { lnurls } from './fixtures/lnurl'
 
 describe('Bitcoin Decode', () => {
   describe('Bolt11', () => {
@@ -174,7 +175,21 @@ describe('Bitcoin Decode', () => {
     })
   })
 
-  // describe('LNURL', () => {})
+  describe('LNURL', () => {
+    it('should decode a valid LNURL (medusa)', () => {
+      const input = lnurls.valid.medusa
+      const result = decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.input).toBe(input)
+      expect(result.destination.destination).toBe(input)
+      expect(result.destination.type).toBe('lnurl')
+      expect(result.destination.protocol).toBe('lightning')
+    })
+  })
 
   describe('BIP-321', () => {
     it('should decode a BIP-321 URI with lightning parameter', () => {
