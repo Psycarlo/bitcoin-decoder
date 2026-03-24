@@ -529,6 +529,104 @@ describe('Bitcoin Decode', () => {
       })
     })
 
+    describe('Regtest', () => {
+      it('should decode a valid P2PKH address (m prefix)', () => {
+        const input = bitcoinAddresses.regtest.p2pkh.valid.m
+        const result = decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.destination).toBe(input)
+        expect(result.destination.type).toBe('bitcoin-address')
+        expect(result.destination.addressType).toBe('p2pkh')
+        expect(result.destination.protocol).toBe('on-chain')
+        expect(result.network).toBe('testnet')
+      })
+
+      it('should decode a valid P2PKH address (n prefix)', () => {
+        const input = bitcoinAddresses.regtest.p2pkh.valid.n
+        const result = decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.destination).toBe(input)
+        expect(result.destination.type).toBe('bitcoin-address')
+        expect(result.destination.addressType).toBe('p2pkh')
+        expect(result.destination.protocol).toBe('on-chain')
+        expect(result.network).toBe('testnet')
+      })
+
+      it('should decode a valid P2SH address', () => {
+        const input = bitcoinAddresses.regtest.p2sh.valid
+        const result = decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.destination).toBe(input)
+        expect(result.destination.type).toBe('bitcoin-address')
+        expect(result.destination.addressType).toBe('p2sh')
+        expect(result.destination.protocol).toBe('on-chain')
+        expect(result.network).toBe('testnet')
+      })
+
+      it('should decode a valid P2WPKH address', () => {
+        const input = bitcoinAddresses.regtest.p2wpkh.valid
+        const result = decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.destination).toBe(input)
+        expect(result.destination.type).toBe('bitcoin-address')
+        expect(result.destination.addressType).toBe('p2wpkh')
+        expect(result.destination.protocol).toBe('on-chain')
+        expect(result.network).toBe('testnet')
+      })
+
+      it('should decode a valid P2WSH address', () => {
+        const input = bitcoinAddresses.regtest.p2wsh.valid
+        const result = decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.destination).toBe(input)
+        expect(result.destination.type).toBe('bitcoin-address')
+        expect(result.destination.addressType).toBe('p2wsh')
+        expect(result.destination.protocol).toBe('on-chain')
+        expect(result.network).toBe('testnet')
+      })
+
+      it('should decode a valid P2TR address', () => {
+        const input = bitcoinAddresses.regtest.p2tr.valid
+        const result = decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.destination).toBe(input)
+        expect(result.destination.type).toBe('bitcoin-address')
+        expect(result.destination.addressType).toBe('p2tr')
+        expect(result.destination.protocol).toBe('on-chain')
+        expect(result.network).toBe('testnet')
+      })
+    })
+
     it('should return invalid for a P2PKH address with wrong decoded length', () => {
       const input = bitcoinAddresses.mainnet.p2pkh.invalid.length
       const result = decode(input)

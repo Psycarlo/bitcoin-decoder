@@ -82,10 +82,25 @@ export const bitcoinAddresses = {
     }
   },
   regtest: {
-    p2pkh: {},
-    p2sh: {},
-    p2wpkh: {},
-    p2wsh: {},
-    p2tr: {}
+    p2pkh: {
+      valid: {
+        m: 'mnMWQXeANLiFGrqUy7daap8ESAKwsksgFR',
+        n: 'myRR9KtA2h9nkTiygRoL6T983s8dG6XUHJ'
+      }
+    },
+    p2sh: {
+      valid: '2N22oYH5ocP5L9ebTGGHh8tHf6cnBCqxrAn'
+    },
+    p2wpkh: {
+      valid: 'bcrt1qdfvpr5kj8wfm8ee8jhkhfux9dwp66cavld2nqe'
+    },
+    p2wsh: {
+      valid:
+        'bcrt1qed5wxnx0spa94c8cq9aqfem5ky3cqps5kqnpjs24t69ejvcqhrvsyezduv'
+    },
+    p2tr: {
+      valid:
+        'bcrt1pspfm8tpmp66sj3783k5n4el99j69my3qpfd8c9aczftx7jttpk5qp7earw'
+    }
   }
 }
