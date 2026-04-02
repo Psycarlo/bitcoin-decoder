@@ -1,6 +1,6 @@
 {
   "name": "bitcoin-decoder",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Decode bitcoin QR codes, URIs, and raw strings",
   "type": "module",
   "exports": {
