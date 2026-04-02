@@ -95,12 +95,10 @@ export const bitcoinAddresses = {
       valid: 'bcrt1qdfvpr5kj8wfm8ee8jhkhfux9dwp66cavld2nqe'
     },
     p2wsh: {
-      valid:
-        'bcrt1qed5wxnx0spa94c8cq9aqfem5ky3cqps5kqnpjs24t69ejvcqhrvsyezduv'
+      valid: 'bcrt1qed5wxnx0spa94c8cq9aqfem5ky3cqps5kqnpjs24t69ejvcqhrvsyezduv'
     },
     p2tr: {
-      valid:
-        'bcrt1pspfm8tpmp66sj3783k5n4el99j69my3qpfd8c9aczftx7jttpk5qp7earw'
+      valid: 'bcrt1pspfm8tpmp66sj3783k5n4el99j69my3qpfd8c9aczftx7jttpk5qp7earw'
     }
   }
 }
