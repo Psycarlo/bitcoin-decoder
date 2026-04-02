@@ -33,8 +33,19 @@ function parse(input: Input): ParsedLNAddress {
   return { username, domain }
 }
 
-function lightningAddress(input: Input): ParsedDestination {
-  parse(input)
+async function lightningAddress(input: Input): Promise<ParsedDestination> {
+  const parsed = parse(input)
+  const result = await wellKnown(
+    `${BASE_URL}${parsed.domain}/.well-known/lnurlp/${parsed.username}`,
+    false
+  )
+
+  if (!result) {
+    throw new DecodeError(
+      `Lightning address not found: ${input}`,
+      'INVALID_LNADDRESS'
+    )
+  }
 
   return {
     destination: {

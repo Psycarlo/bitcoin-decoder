@@ -5,8 +5,8 @@ import { useCallback, useState } from 'react'
 export function useDecode() {
   const [result, setResult] = useState<DecodedData | null>(null)
 
-  const handleDecode = useCallback((input: string) => {
-    const decoded = decode(input)
+  const handleDecode = useCallback(async (input: string) => {
+    const decoded = await decode(input)
     setResult(decoded)
   }, [])
 

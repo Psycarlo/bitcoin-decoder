@@ -65,8 +65,8 @@ function decodeBolt12(input: Input, offer: Input): SuccessPayload {
   }
 }
 
-function decodeLightningAddress(input: Input): SuccessPayload {
-  const parsedDestination = lightningAddress(input)
+async function decodeLightningAddress(input: Input): Promise<SuccessPayload> {
+  const parsedDestination = await lightningAddress(input)
   const destination = toDestination(parsedDestination.destination)
 
   return {
@@ -77,8 +77,8 @@ function decodeLightningAddress(input: Input): SuccessPayload {
   }
 }
 
-function decodeLnurl(input: Input): SuccessPayload {
-  const parsedDestination = lnurl(input)
+async function decodeLnurl(input: Input): Promise<SuccessPayload> {
+  const parsedDestination = await lnurl(input)
   const destination = toDestination(parsedDestination.destination)
 
   return {
@@ -138,7 +138,7 @@ function decodeBitcoin(input: Input): SuccessPayload {
   }
 }
 
-function decodeInput(input: Input): SuccessPayload {
+async function decodeInput(input: Input): Promise<SuccessPayload> {
   const lowerInput = input.toLowerCase()
 
   if (lowerInput.startsWith(BIP321_PREFIX)) {
@@ -158,7 +158,7 @@ function decodeInput(input: Input): SuccessPayload {
   }
 
   if (lowerInput.startsWith(LNURL_PREFIX)) {
-    return decodeLnurl(input)
+    return await decodeLnurl(input)
   }
 
   if (ARK_PREFIXES.some((prefix) => lowerInput.startsWith(prefix))) {
@@ -166,7 +166,7 @@ function decodeInput(input: Input): SuccessPayload {
   }
 
   if (input.includes('@')) {
-    return decodeLightningAddress(input)
+    return await decodeLightningAddress(input)
   }
 
   if (
@@ -196,9 +196,9 @@ function getErrorCode(error: unknown): DecodedData & { valid: false } {
   }
 }
 
-function decode(input: Input): DecodedData {
+async function decode(input: Input): Promise<DecodedData> {
   try {
-    return { valid: true, ...decodeInput(input) }
+    return { valid: true, ...(await decodeInput(input)) }
   } catch (error) {
     return { ...getErrorCode(error), input }
   }

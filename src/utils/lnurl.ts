@@ -4,7 +4,7 @@ import { DecodeError } from '../types'
 
 const LNURL_PREFIX = 'lnurl'
 
-function lnurl(input: Input): ParsedDestination {
+async function lnurl(input: Input): Promise<ParsedDestination> {
   let words: number[]
 
   try {
@@ -30,6 +30,23 @@ function lnurl(input: Input): ParsedDestination {
 
   if (!url.startsWith('https://')) {
     throw new DecodeError('LNURL does not contain a valid URL', 'INVALID_LNURL')
+  }
+
+  try {
+    const response = await fetch(url, { method: 'GET' })
+    const json = (await response.json()) as Record<string, unknown>
+
+    if (!json.callback) {
+      throw new DecodeError(
+        'LNURL endpoint returned invalid response',
+        'INVALID_LNURL'
+      )
+    }
+  } catch (error) {
+    if (error instanceof DecodeError) {
+      throw error
+    }
+    throw new DecodeError(`LNURL endpoint unreachable: ${url}`, 'INVALID_LNURL')
   }
 
   return {

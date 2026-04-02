@@ -8,10 +8,10 @@ import { lnurls } from './fixtures/lnurl'
 
 describe('Bitcoin Decode', () => {
   describe('Bolt11', () => {
-    it('should decode a testnet bolt11 invoice', () => {
+    it('should decode a testnet bolt11 invoice', async () => {
       const input =
         'lntbs10u1p5et0y3sp5cp3sp45t3hh84t08gcf49ye8athryy36vjym5q0r65sjxen5qkeqpp57m9wees47jhe83cjvtyaln0lpfne90scfvyhk630eklrpnuvfgqqdq4g9exkgznw3hhyefqyvensxqzjccqp2rzjq2v454h7kjlfx9c6kcfeprd4d7lsn4cmhsngyuvmx9pr6lmepgu0cpzs3yqqqtqqqqqqqqqpqqqqqzsqqc9qxpqysgqsxudq7yy8nq4lmct42eq6rhq4rl76w2u89w35nas4djcdyw4dvz9qs40ta8s9nu8sypwzr6hpsdelgaurn8nw0mr69nnmke7nmma25sqnxeyj0'
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(true)
       if (!result.valid) {
@@ -26,10 +26,10 @@ describe('Bitcoin Decode', () => {
       expect(result.metadata?.description).toBe('Ark Store #38')
     })
 
-    it('should decode a mainnet bolt11 invoice', () => {
+    it('should decode a mainnet bolt11 invoice', async () => {
       const input =
         'lnbc10u1p5et0xtpp5lmuztz4yunmruy30a3xqgw4ng8m2m8vzx5af48f85t9ymu3gr0esdq823jhxaqcqzzsxqrrsssp5lc3sp7932r379kcmnat4c20cgudp4vhlzwsqjqcvw0gqw27pjv6s9qxpqysgq4a5zpt7227kz33qe4kx3wrzvm2m88nchqq5sjd4p8ezjfpdcxlwy6pw39qwhym7sxesxazyz6ezjv3l7r62musv6jsdn8aqqjw6r50qp32unnk'
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(true)
       if (!result.valid) {
@@ -46,10 +46,10 @@ describe('Bitcoin Decode', () => {
   })
 
   describe('Bolt12', () => {
-    it('should decode a mainnet bolt12 offer', () => {
+    it('should decode a mainnet bolt12 offer', async () => {
       const input =
         'lno1pqps7sjqpgz9getnwsgwuquxfmcztl0gldv8mxy3sm8x5jscdz27u39fy6luxu8zcdn9j73l3upsh07rk5jt5kkev5xadp5d3hulrgyv0m3u4h20h2gz7tzntd45huszqgxxjs85lxz5rc0r3uwfrwgk92pp2a5rdpx9cjrjvjhqyc5x5dkyvqpnclwrc8k5z8atcvvptlwv9dty80qt7378lxt0nhpezz8m9zxzulxftqf399m279led8889uy3rssvlwgmwqpfvg8m5qksdsz8pnhhyvlcgkplzvngwftzjd32qps35mql888hd6sqx2g5k9al75w4p4apqa9gay0gwsquw2pjaqhvuvvmws7k5wan4fae3c3tnt33qh85lekwevhqvaqw5nk2hc'
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(true)
       if (!result.valid) {
@@ -66,9 +66,9 @@ describe('Bitcoin Decode', () => {
 
   describe('Lightning addresses', () => {
     describe('decode', () => {
-      it('should decode a valid lightning address (medusa)', () => {
+      it('should decode a valid lightning address (medusa)', async () => {
         const input = lightningAddresses.valid.medusa
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -80,9 +80,9 @@ describe('Bitcoin Decode', () => {
         expect(result.destination.protocol).toBe('lightning')
       })
 
-      it('should decode a valid lightning address (wos)', () => {
+      it('should decode a valid lightning address (wos)', async () => {
         const input = lightningAddresses.valid.wos
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -94,8 +94,8 @@ describe('Bitcoin Decode', () => {
         expect(result.destination.protocol).toBe('lightning')
       })
 
-      it('should return invalid for a lightning address without domain', () => {
-        const result = decode('user@')
+      it('should return invalid for a non-existent lightning address', async () => {
+        const result = await decode(lightningAddresses.invalid.notfound)
 
         expect(result.valid).toBe(false)
         if (result.valid) {
@@ -104,8 +104,18 @@ describe('Bitcoin Decode', () => {
         expect(result.errorCode).toBe('INVALID_LNADDRESS')
       })
 
-      it('should return invalid for a lightning address without TLD', () => {
-        const result = decode('user@domain')
+      it('should return invalid for a lightning address without domain', async () => {
+        const result = await decode('user@')
+
+        expect(result.valid).toBe(false)
+        if (result.valid) {
+          return
+        }
+        expect(result.errorCode).toBe('INVALID_LNADDRESS')
+      })
+
+      it('should return invalid for a lightning address without TLD', async () => {
+        const result = await decode('user@domain')
 
         expect(result.valid).toBe(false)
         if (result.valid) {
@@ -155,11 +165,11 @@ describe('Bitcoin Decode', () => {
   })
 
   describe('Payment request', () => {
-    it('should decode a lightning: prefixed bolt11 invoice', () => {
+    it('should decode a lightning: prefixed bolt11 invoice', async () => {
       const invoice =
         'lnbc10u1p5et0xtpp5lmuztz4yunmruy30a3xqgw4ng8m2m8vzx5af48f85t9ymu3gr0esdq823jhxaqcqzzsxqrrsssp5lc3sp7932r379kcmnat4c20cgudp4vhlzwsqjqcvw0gqw27pjv6s9qxpqysgq4a5zpt7227kz33qe4kx3wrzvm2m88nchqq5sjd4p8ezjfpdcxlwy6pw39qwhym7sxesxazyz6ezjv3l7r62musv6jsdn8aqqjw6r50qp32unnk'
       const input = `lightning:${invoice}`
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(true)
       if (!result.valid) {
@@ -176,9 +186,9 @@ describe('Bitcoin Decode', () => {
   })
 
   describe('LNURL', () => {
-    it('should decode a valid LNURL (medusa)', () => {
+    it('should decode a valid LNURL (medusa)', async () => {
       const input = lnurls.valid.medusa
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(true)
       if (!result.valid) {
@@ -192,11 +202,11 @@ describe('Bitcoin Decode', () => {
   })
 
   describe('BIP-321', () => {
-    it('should decode a BIP-321 URI with lightning parameter', () => {
+    it('should decode a BIP-321 URI with lightning parameter', async () => {
       const lightning =
         'LNTBS10U1P5ET0Y3SP5CP3SP45T3HH84T08GCF49YE8ATHRYY36VJYM5Q0R65SJXEN5QKEQPP57M9WEES47JHE83CJVTYALN0LPFNE90SCFVYHK630EKLRPNUVFGQQDQ4G9EXKGZNW3HHYEFQYVENSXQZJCCQP2RZJQ2V454H7KJLFX9C6KCFEPRD4D7LSN4CMHSNGYUVMX9PR6LMEPGU0CPZS3YQQQTQQQQQQQQQPQQQQQZSQQC9QXPQYSGQSXUDQ7YY8NQ4LMCT42EQ6RHQ4RL76W2U89W35NAS4DJCDYW4DVZ9QS40TA8S9NU8SYPWZR6HPSDELGAURN8NW0MR69NNMKE7NMMA25SQNXEYJ0'
       const input = `bitcoin:?amount=0.00001&label=Byte%20Store&message=Kibbles%20'n%20Bits&lightning=${lightning}`
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(true)
       if (!result.valid) {
@@ -211,11 +221,11 @@ describe('Bitcoin Decode', () => {
       expect(result.metadata?.description).toBe('Ark Store #38')
     })
 
-    it('should decode a BIP-321 URI with bolt12 offer parameter', () => {
+    it('should decode a BIP-321 URI with bolt12 offer parameter', async () => {
       const offer =
         'lno1pqps7sjqpgz9getnwsgwuquxfmcztl0gldv8mxy3sm8x5jscdz27u39fy6luxu8zcdn9j73l3upsh07rk5jt5kkev5xadp5d3hulrgyv0m3u4h20h2gz7tzntd45huszqgxxjs85lxz5rc0r3uwfrwgk92pp2a5rdpx9cjrjvjhqyc5x5dkyvqpnclwrc8k5z8atcvvptlwv9dty80qt7378lxt0nhpezz8m9zxzulxftqf399m279led8889uy3rssvlwgmwqpfvg8m5qksdsz8pnhhyvlcgkplzvngwftzjd32qps35mql888hd6sqx2g5k9al75w4p4apqa9gay0gwsquw2pjaqhvuvvmws7k5wan4fae3c3tnt33qh85lekwevhqvaqw5nk2hc'
       const input = `bitcoin:?lno=${offer}`
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(true)
       if (!result.valid) {
@@ -231,9 +241,9 @@ describe('Bitcoin Decode', () => {
 
   describe('Bitcoin addresses', () => {
     describe('Mainnet', () => {
-      it('should decode a valid P2PKH address', () => {
+      it('should decode a valid P2PKH address', async () => {
         const input = bitcoinAddresses.mainnet.p2pkh.valid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -247,9 +257,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('mainnet')
       })
 
-      it('should return invalid for a P2PKH address with bad checksum', () => {
+      it('should return invalid for a P2PKH address with bad checksum', async () => {
         const input = bitcoinAddresses.mainnet.p2pkh.invalid.checksum
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(false)
         if (result.valid) {
@@ -260,9 +270,9 @@ describe('Bitcoin Decode', () => {
         expect(result.errorMessage).toBeDefined()
       })
 
-      it('should decode a valid P2SH address', () => {
+      it('should decode a valid P2SH address', async () => {
         const input = bitcoinAddresses.mainnet.p2sh.valid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -276,9 +286,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('mainnet')
       })
 
-      it('should return invalid for a P2SH address with bad checksum', () => {
+      it('should return invalid for a P2SH address with bad checksum', async () => {
         const input = bitcoinAddresses.mainnet.p2sh.invalid.checksum
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(false)
         if (result.valid) {
@@ -289,9 +299,9 @@ describe('Bitcoin Decode', () => {
         expect(result.errorMessage).toBeDefined()
       })
 
-      it('should decode a valid P2TR address', () => {
+      it('should decode a valid P2TR address', async () => {
         const input = bitcoinAddresses.mainnet.p2tr.valid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -305,9 +315,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('mainnet')
       })
 
-      it('should return invalid for a P2TR address with bad checksum', () => {
+      it('should return invalid for a P2TR address with bad checksum', async () => {
         const input = bitcoinAddresses.mainnet.p2tr.invalid.checksum
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(false)
         if (result.valid) {
@@ -320,9 +330,9 @@ describe('Bitcoin Decode', () => {
     })
 
     describe('Testnet', () => {
-      it('should decode a valid P2PKH address', () => {
+      it('should decode a valid P2PKH address', async () => {
         const input = bitcoinAddresses.testnet.p2pkh.valid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -336,9 +346,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
-      it('should return invalid for a P2PKH address with bad checksum', () => {
+      it('should return invalid for a P2PKH address with bad checksum', async () => {
         const input = bitcoinAddresses.testnet.p2pkh.invalid.checksum
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(false)
         if (result.valid) {
@@ -349,9 +359,9 @@ describe('Bitcoin Decode', () => {
         expect(result.errorMessage).toBeDefined()
       })
 
-      it('should decode a valid P2SH address', () => {
+      it('should decode a valid P2SH address', async () => {
         const input = bitcoinAddresses.testnet.p2sh.valid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -365,9 +375,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
-      it('should return invalid for a P2SH address with bad checksum', () => {
+      it('should return invalid for a P2SH address with bad checksum', async () => {
         const input = bitcoinAddresses.testnet.p2sh.invalid.checksum
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(false)
         if (result.valid) {
@@ -378,9 +388,9 @@ describe('Bitcoin Decode', () => {
         expect(result.errorMessage).toBeDefined()
       })
 
-      it('should decode a valid P2WPKH address', () => {
+      it('should decode a valid P2WPKH address', async () => {
         const input = bitcoinAddresses.testnet.p2wpkh.valid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -394,9 +404,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
-      it('should return invalid for a P2WPKH address with bad checksum', () => {
+      it('should return invalid for a P2WPKH address with bad checksum', async () => {
         const input = bitcoinAddresses.testnet.p2wpkh.invalid.checksum
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(false)
         if (result.valid) {
@@ -407,9 +417,9 @@ describe('Bitcoin Decode', () => {
         expect(result.errorMessage).toBeDefined()
       })
 
-      it('should decode a valid P2TR address', () => {
+      it('should decode a valid P2TR address', async () => {
         const input = bitcoinAddresses.testnet.p2tr.valid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -423,9 +433,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
-      it('should return invalid for a P2TR address with bad checksum', () => {
+      it('should return invalid for a P2TR address with bad checksum', async () => {
         const input = bitcoinAddresses.testnet.p2tr.invalid.checksum
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(false)
         if (result.valid) {
@@ -438,9 +448,9 @@ describe('Bitcoin Decode', () => {
     })
 
     describe('Signet', () => {
-      it('should decode a valid P2PKH address (m prefix)', () => {
+      it('should decode a valid P2PKH address (m prefix)', async () => {
         const input = bitcoinAddresses.signet.p2pkh.valid.m
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -454,9 +464,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
-      it('should decode a valid P2PKH address (n prefix)', () => {
+      it('should decode a valid P2PKH address (n prefix)', async () => {
         const input = bitcoinAddresses.signet.p2pkh.valid.n
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -470,9 +480,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
-      it('should return invalid for a P2PKH address with bad checksum', () => {
+      it('should return invalid for a P2PKH address with bad checksum', async () => {
         const input = bitcoinAddresses.signet.p2pkh.invalid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(false)
         if (result.valid) {
@@ -483,9 +493,9 @@ describe('Bitcoin Decode', () => {
         expect(result.errorMessage).toBeDefined()
       })
 
-      it('should decode a valid P2SH address', () => {
+      it('should decode a valid P2SH address', async () => {
         const input = bitcoinAddresses.signet.p2sh.valid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -499,9 +509,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
-      it('should decode a valid P2TR address', () => {
+      it('should decode a valid P2TR address', async () => {
         const input = bitcoinAddresses.signet.p2tr.valid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -515,9 +525,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
-      it('should return invalid for a P2TR address with bad checksum', () => {
+      it('should return invalid for a P2TR address with bad checksum', async () => {
         const input = bitcoinAddresses.signet.p2tr.invalid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(false)
         if (result.valid) {
@@ -530,9 +540,9 @@ describe('Bitcoin Decode', () => {
     })
 
     describe('Regtest', () => {
-      it('should decode a valid P2PKH address (m prefix)', () => {
+      it('should decode a valid P2PKH address (m prefix)', async () => {
         const input = bitcoinAddresses.regtest.p2pkh.valid.m
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -546,9 +556,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
-      it('should decode a valid P2PKH address (n prefix)', () => {
+      it('should decode a valid P2PKH address (n prefix)', async () => {
         const input = bitcoinAddresses.regtest.p2pkh.valid.n
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -562,9 +572,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
-      it('should decode a valid P2SH address', () => {
+      it('should decode a valid P2SH address', async () => {
         const input = bitcoinAddresses.regtest.p2sh.valid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -578,9 +588,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
-      it('should decode a valid P2WPKH address', () => {
+      it('should decode a valid P2WPKH address', async () => {
         const input = bitcoinAddresses.regtest.p2wpkh.valid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -594,9 +604,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
-      it('should decode a valid P2WSH address', () => {
+      it('should decode a valid P2WSH address', async () => {
         const input = bitcoinAddresses.regtest.p2wsh.valid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -610,9 +620,9 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
-      it('should decode a valid P2TR address', () => {
+      it('should decode a valid P2TR address', async () => {
         const input = bitcoinAddresses.regtest.p2tr.valid
-        const result = decode(input)
+        const result = await decode(input)
 
         expect(result.valid).toBe(true)
         if (!result.valid) {
@@ -627,9 +637,9 @@ describe('Bitcoin Decode', () => {
       })
     })
 
-    it('should return invalid for a P2PKH address with wrong decoded length', () => {
+    it('should return invalid for a P2PKH address with wrong decoded length', async () => {
       const input = bitcoinAddresses.mainnet.p2pkh.invalid.length
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(false)
       if (result.valid) {
@@ -640,9 +650,9 @@ describe('Bitcoin Decode', () => {
       expect(result.errorMessage).toBeDefined()
     })
 
-    it('should return invalid for a P2WPKH address with wrong program length', () => {
+    it('should return invalid for a P2WPKH address with wrong program length', async () => {
       const input = bitcoinAddresses.mainnet.p2wpkh.invalid.programLength
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(false)
       if (result.valid) {
@@ -653,9 +663,9 @@ describe('Bitcoin Decode', () => {
       expect(result.errorMessage).toBeDefined()
     })
 
-    it('should return invalid for a P2TR address with wrong program length', () => {
+    it('should return invalid for a P2TR address with wrong program length', async () => {
       const input = bitcoinAddresses.mainnet.p2tr.invalid.programLength
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(false)
       if (result.valid) {
@@ -668,9 +678,9 @@ describe('Bitcoin Decode', () => {
   })
 
   describe('Ark addresses', () => {
-    it('should decode a testnet ark (bark) address', () => {
+    it('should decode a testnet ark (bark) address', async () => {
       const input = ArkAddresses.testnet.valid.bark
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(true)
       if (!result.valid) {
@@ -683,9 +693,9 @@ describe('Bitcoin Decode', () => {
       expect(result.network).toBe('testnet')
     })
 
-    it('should decode a testnet ark (arkade) address', () => {
+    it('should decode a testnet ark (arkade) address', async () => {
       const input = ArkAddresses.testnet.valid.arkade
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(true)
       if (!result.valid) {
@@ -698,9 +708,9 @@ describe('Bitcoin Decode', () => {
       expect(result.network).toBe('testnet')
     })
 
-    it('should return invalid for an ark address with bad checksum', () => {
+    it('should return invalid for an ark address with bad checksum', async () => {
       const input = ArkAddresses.testnet.invalid.checksum
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(false)
       if (result.valid) {
@@ -711,9 +721,9 @@ describe('Bitcoin Decode', () => {
       expect(result.errorMessage).toBeDefined()
     })
 
-    it('should return invalid for an incomplete testnet ark address', () => {
+    it('should return invalid for an incomplete testnet ark address', async () => {
       const input = ArkAddresses.testnet.invalid.incomplete
-      const result = decode(input)
+      const result = await decode(input)
 
       expect(result.valid).toBe(false)
       if (result.valid) {
