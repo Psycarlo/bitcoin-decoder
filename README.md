@@ -13,3 +13,7 @@ import { decode } from 'bitcoin-decoder'
 
 const result = decode('1111111111111111111114oLvT2')
 ```
+
+## License
+
+Released under the **MIT** license.
