@@ -52,13 +52,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Psycarlo/bitcoin-decode"
+    "url": "https://github.com/Psycarlo/bitcoin-decoder"
   },
   "bugs": {
     "email": "psycarlo1@gmail.com",
-    "url": "https://github.com/Psycarlo/bitcoin-decode/issues"
+    "url": "https://github.com/Psycarlo/bitcoin-decoder/issues"
   },
-  "homepage": "https://github.com/Psycarlo/bitcoin-decode#readme",
+  "homepage": "https://github.com/Psycarlo/bitcoin-decoder#readme",
   "workspaces": [
     "website"
   ]
