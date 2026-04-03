@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'bun:test'
 import { decode, wellKnown } from '../src'
 import { ArkAddresses } from './fixtures/ark'
+import { bip321URIs } from './fixtures/bip-321'
 import { bitcoinAddresses } from './fixtures/bitcoin'
 import { lightningAddresses } from './fixtures/lightning-address'
 import { lnurls } from './fixtures/lnurl'
@@ -219,6 +220,23 @@ describe('Bitcoin Decode', () => {
       expect(result.network).toBe('testnet')
       expect(result.metadata?.amount).toBe(1000)
       expect(result.metadata?.description).toBe('Ark Store #38')
+    })
+
+    it('should decode a BIP-321 URI with lightning address and ark', async () => {
+      const input = bip321URIs.lightningAddressWithArk
+      const result = await decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.input).toBe(input)
+      expect(result.destination.destination).toBe('psycarlo@medusa.bz')
+      expect(result.destination.type).toBe('lnaddress')
+      expect(result.destination.protocol).toBe('lightning')
+      expect(result.destinations).toHaveLength(2)
+      expect(result.destinations[1]?.type).toBe('ark-address')
+      expect(result.destinations[1]?.protocol).toBe('ark')
     })
 
     it('should decode a BIP-321 URI with bolt12 offer parameter', async () => {

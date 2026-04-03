@@ -8,6 +8,7 @@ import { ark } from './ark'
 import { bitcoin } from './bitcoin'
 import { bolt11 } from './bolt11'
 import { bolt12 } from './bolt12'
+import { lightningAddress } from './lightning-address'
 
 const SATS_PER_BTC = 100_000_000
 
@@ -40,11 +41,14 @@ function getMetadata(result: BIP321ParseResult): Metadata | undefined {
   return { amount, description }
 }
 
-function mapPaymentMethod(
+async function mapPaymentMethod(
   paymentMethod: PaymentMethod & { type: SupportedPaymentType },
   metadata?: Metadata
-): ParsedDestination {
+): Promise<ParsedDestination> {
   if (paymentMethod.type === 'lightning') {
+    if (paymentMethod.value.includes('@')) {
+      return lightningAddress(paymentMethod.value)
+    }
     return bolt11(paymentMethod.value)
   }
 
@@ -60,20 +64,26 @@ function mapPaymentMethod(
   return { ...parsed, metadata }
 }
 
-function parse(result: BIP321ParseResult): ParsedDestination[] {
+async function parse(
+  result: BIP321ParseResult
+): Promise<ParsedDestination[]> {
   const metadata = getMetadata(result)
 
-  return result.paymentMethods
-    .filter(
-      (method): method is PaymentMethod & { type: SupportedPaymentType } =>
-        (method.valid || method.type === 'offer') &&
-        isSupportedType(method.type)
-    )
-    .sort((a, b) => PROTOCOL_PRIORITY[a.type] - PROTOCOL_PRIORITY[b.type])
-    .map((method) => mapPaymentMethod(method, metadata))
+  return Promise.all(
+    result.paymentMethods
+      .filter(
+        (method): method is PaymentMethod & { type: SupportedPaymentType } =>
+          (method.valid ||
+            method.type === 'offer' ||
+            (method.type === 'lightning' && method.value.includes('@'))) &&
+          isSupportedType(method.type)
+      )
+      .sort((a, b) => PROTOCOL_PRIORITY[a.type] - PROTOCOL_PRIORITY[b.type])
+      .map((method) => mapPaymentMethod(method, metadata))
+  )
 }
 
-function bip321(input: Input): ParsedDestination[] {
+async function bip321(input: Input): Promise<ParsedDestination[]> {
   const result = parseBIP321(input)
 
   if (!result.valid) {

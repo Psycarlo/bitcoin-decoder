@@ -101,8 +101,8 @@ function decodeArk(input: Input): SuccessPayload {
   }
 }
 
-function decodeBip321(input: Input): SuccessPayload {
-  const parsedDestinations = bip321(input)
+async function decodeBip321(input: Input): Promise<SuccessPayload> {
+  const parsedDestinations = await bip321(input)
 
   const first = parsedDestinations[0]
   if (!first) {
