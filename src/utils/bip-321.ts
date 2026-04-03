@@ -47,7 +47,7 @@ async function mapPaymentMethod(
 ): Promise<ParsedDestination> {
   if (paymentMethod.type === 'lightning') {
     if (paymentMethod.value.includes('@')) {
-      return lightningAddress(paymentMethod.value)
+      return await lightningAddress(paymentMethod.value)
     }
     return bolt11(paymentMethod.value)
   }
@@ -64,12 +64,10 @@ async function mapPaymentMethod(
   return { ...parsed, metadata }
 }
 
-async function parse(
-  result: BIP321ParseResult
-): Promise<ParsedDestination[]> {
+async function parse(result: BIP321ParseResult): Promise<ParsedDestination[]> {
   const metadata = getMetadata(result)
 
-  return Promise.all(
+  return await Promise.all(
     result.paymentMethods
       .filter(
         (method): method is PaymentMethod & { type: SupportedPaymentType } =>
@@ -90,7 +88,7 @@ async function bip321(input: Input): Promise<ParsedDestination[]> {
     throw new Error(`Invalid BIP-321 URI: ${result.errors.join(', ')}`)
   }
 
-  return parse(result)
+  return await parse(result)
 }
 
 export { bip321 }
