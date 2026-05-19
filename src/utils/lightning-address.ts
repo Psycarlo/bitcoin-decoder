@@ -7,6 +7,7 @@ import type {
 import { DecodeError } from '../types'
 
 const BASE_URL = 'https://'
+const FETCH_TIMEOUT_MS = 5000
 
 const headers = { 'Content-Type': 'application/json' }
 
@@ -74,7 +75,8 @@ async function wellKnown(
   try {
     const response = await fetch(url, {
       headers,
-      method: 'GET'
+      method: 'GET',
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS)
     })
     const json = (await response.json()) as Record<string, unknown>
 

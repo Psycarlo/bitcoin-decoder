@@ -6,6 +6,6 @@ export const lightningAddresses = {
   invalid: {
     medusa: 'thisusernotfound@medusa.bz',
     wos: 'thisusernotfound@walletofsatoshi.com',
-    notfound: 'error@notfound.com'
+    notfound: 'error@example.com'
   }
 }

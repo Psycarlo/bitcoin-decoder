@@ -3,6 +3,7 @@ import type { Input, ParsedDestination } from '../types'
 import { DecodeError } from '../types'
 
 const LNURL_PREFIX = 'lnurl'
+const FETCH_TIMEOUT_MS = 5000
 
 async function lnurl(input: Input): Promise<ParsedDestination> {
   let words: number[]
@@ -33,7 +34,10 @@ async function lnurl(input: Input): Promise<ParsedDestination> {
   }
 
   try {
-    const response = await fetch(url, { method: 'GET' })
+    const response = await fetch(url, {
+      method: 'GET',
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS)
+    })
     const json = (await response.json()) as Record<string, unknown>
 
     if (!json.callback) {
