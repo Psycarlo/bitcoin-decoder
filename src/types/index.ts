@@ -63,8 +63,10 @@ export type WellKnown = {
   metadata?: string
 }
 
-type DecodedSuccess = {
+export type DecodedPayment = {
   valid: true
+  /** Category of decoded entity. Discriminator for future kinds (nostr, transaction, psbt, key, identifier). */
+  kind: 'payment'
   /** Raw text passed by the user */
   input: Input
   /** All parsed destinations */
@@ -77,7 +79,7 @@ type DecodedSuccess = {
   metadata?: Metadata
 }
 
-type DecodedError = {
+export type DecodedError = {
   valid: false
   /** Raw text passed by the user */
   input: Input
@@ -85,7 +87,7 @@ type DecodedError = {
   errorCode: ErrorCode
 }
 
-export type DecodedData = DecodedSuccess | DecodedError
+export type DecodedData = DecodedPayment | DecodedError
 
 export class DecodeError extends Error {
   code: ErrorCode

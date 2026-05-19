@@ -19,8 +19,8 @@ const LIGHTNING_PREFIX = 'lightning:'
 const BOLT11_PREFIXES = ['lnbcrt', 'lntbs', 'lnbc', 'lntb']
 const BOLT12_PREFIXES = ['lnbcrto1', 'lnto1', 'lno1']
 
-type SuccessData = Extract<DecodedData, { valid: true }>
-type SuccessPayload = Omit<SuccessData, 'valid'>
+type SuccessData = Extract<DecodedData, { valid: true; kind: 'payment' }>
+type SuccessPayload = Omit<SuccessData, 'valid' | 'kind'>
 
 function toDestination(pd: ParsedDestination['destination']): Destination {
   if (pd.type === 'bitcoin-address') {
@@ -198,7 +198,7 @@ function getErrorCode(error: unknown): DecodedData & { valid: false } {
 
 async function decode(input: Input): Promise<DecodedData> {
   try {
-    return { valid: true, ...(await decodeInput(input)) }
+    return { valid: true, kind: 'payment', ...(await decodeInput(input)) }
   } catch (error) {
     return { ...getErrorCode(error), input }
   }
