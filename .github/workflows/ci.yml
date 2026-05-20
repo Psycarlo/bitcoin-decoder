@@ -3,6 +3,8 @@ name: CI
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
 
 jobs:
   check:
@@ -19,4 +21,6 @@ jobs:
       - name: Type check
         run: bun run type-check
       - name: Test
-        run: bun test
+        run: bun run test
+      - name: Live tests
+        run: bun run test:live

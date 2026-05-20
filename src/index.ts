@@ -1,7 +1,9 @@
 import type {
   DecodedData,
+  DecodeOptions,
   Destination,
   Input,
+  NostrEntity,
   ParsedDestination
 } from './types'
 import { DecodeError } from './types'
@@ -13,6 +15,8 @@ import { bolt12 } from './utils/bolt12'
 import { lightningAddress } from './utils/lightning-address'
 import { LNURL_PREFIX, lnurl } from './utils/lnurl'
 import { getNetwork } from './utils/network'
+import { NOSTR_PREFIXES, nostr } from './utils/nostr'
+import { fetchProfile } from './utils/nostr-profile'
 
 const BIP321_PREFIX = 'bitcoin:'
 const LIGHTNING_PREFIX = 'lightning:'
@@ -196,8 +200,55 @@ function getErrorCode(error: unknown): DecodedData & { valid: false } {
   }
 }
 
-async function decode(input: Input): Promise<DecodedData> {
+function isNostrInput(lowerInput: string): boolean {
+  return NOSTR_PREFIXES.some((prefix) => lowerInput.startsWith(`${prefix}1`))
+}
+
+async function enrichWithProfile(
+  entity: NostrEntity,
+  opts: DecodeOptions
+): Promise<NostrEntity> {
+  const nostrOpts = opts.nostr
+  if (!nostrOpts?.fetchProfile) {
+    return entity
+  }
+
+  if (entity.type === 'npub') {
+    const profile = await fetchProfile({
+      pubkey: entity.data.hex,
+      relays: nostrOpts.relays,
+      timeout: nostrOpts.timeout,
+      verify: nostrOpts.verify
+    })
+    return { type: 'npub', data: { ...entity.data, profile } }
+  }
+
+  if (entity.type === 'nprofile') {
+    const relays = Array.from(
+      new Set([...(nostrOpts.relays ?? []), ...entity.data.relays])
+    )
+    const profile = await fetchProfile({
+      pubkey: entity.data.pubkey,
+      relays: relays.length > 0 ? relays : undefined,
+      timeout: nostrOpts.timeout,
+      verify: nostrOpts.verify
+    })
+    return { type: 'nprofile', data: { ...entity.data, profile } }
+  }
+
+  return entity
+}
+
+async function decode(
+  input: Input,
+  opts: DecodeOptions = {}
+): Promise<DecodedData> {
   try {
+    const lowerInput = input.toLowerCase()
+    if (isNostrInput(lowerInput)) {
+      const entity = await enrichWithProfile(nostr(input), opts)
+      return { valid: true, kind: 'nostr', input, entity }
+    }
     return { valid: true, kind: 'payment', ...(await decodeInput(input)) }
   } catch (error) {
     return { ...getErrorCode(error), input }
@@ -205,12 +256,21 @@ async function decode(input: Input): Promise<DecodedData> {
 }
 
 export { decode }
+export type { NostrRelayUrl } from './constants/nostr-relays'
+export { DEFAULT_NOSTR_RELAYS, NOSTR_RELAYS } from './constants/nostr-relays'
 export type {
   DecodedData,
+  DecodedNostr,
+  DecodedPayment,
+  DecodeOptions,
   Destination,
   Metadata,
   Network,
+  NostrDecodeOptions,
+  NostrEntity,
+  NostrProfile,
   ParsedLNAddress,
+  ProfileFetchResult,
   WellKnown
 } from './types'
 export { wellKnown } from './utils/lightning-address'
