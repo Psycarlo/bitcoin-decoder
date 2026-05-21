@@ -9,14 +9,18 @@ npm install bitcoin-decoder
 ## Quick Start
 
 ```typescript
-import { decode } from 'bitcoin-decoder'
+import { decode } from "bitcoin-decoder";
 
-const result = decode('1111111111111111111114oLvT2')
+const result = decode("1111111111111111111114oLvT2");
 ```
 
 ## Features
 
 See [FEATURES.md](FEATURES.md) for the full list of supported formats.
+
+## Contributing
+
+Thinking of opening a pull request? See our [contribution guide](CONTRIBUTING.md) for dependencies, style guidelines, and code hygiene expectations.
 
 ## License
 
