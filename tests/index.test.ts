@@ -1017,4 +1017,296 @@ describe('Bitcoin Decode', () => {
       }
     })
   })
+
+  describe('Transaction', () => {
+    const TXID =
+      'a16f3ce4dd5deb92d98ef5cf8afeaf0775ebca408f708b2146c4fb42b41e14be'
+    const ESPLORA_TX_JSON = {
+      txid: TXID,
+      version: 1,
+      locktime: 0,
+      vin: [
+        {
+          txid: 'f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16',
+          vout: 1,
+          prevout: {
+            scriptpubkey_type: 'p2pk',
+            scriptpubkey_address: undefined,
+            value: 5_000_000_000
+          },
+          sequence: 4_294_967_295,
+          is_coinbase: false
+        }
+      ],
+      vout: [
+        {
+          scriptpubkey_type: 'p2pk',
+          scriptpubkey_address: undefined,
+          value: 1_000_000_000
+        },
+        {
+          scriptpubkey_type: 'p2pk',
+          scriptpubkey_address: undefined,
+          value: 3_000_000_000
+        }
+      ],
+      size: 275,
+      weight: 1100,
+      fee: 0,
+      status: {
+        confirmed: true,
+        block_height: 181,
+        block_hash:
+          '00000000dc55860c8a29c58d45209318fa9e9dc2c1833a7226d86bc465afc6e5',
+        block_time: 1_231_740_133
+      }
+    }
+    const COINBASE_TXID =
+      '8c14f0db3df150123e6f3dbbf30f8b955a8249b62ac1d1ff16284aefa3d06d87'
+    const COINBASE_TX_JSON = {
+      txid: COINBASE_TXID,
+      version: 1,
+      locktime: 0,
+      vin: [
+        {
+          txid: '0000000000000000000000000000000000000000000000000000000000000000',
+          vout: 4_294_967_295,
+          prevout: null,
+          sequence: 4_294_967_295,
+          is_coinbase: true
+        }
+      ],
+      vout: [
+        {
+          scriptpubkey_type: 'p2pk',
+          scriptpubkey_address: undefined,
+          value: 5_000_000_000
+        }
+      ],
+      size: 135,
+      weight: 540,
+      fee: 0,
+      status: {
+        confirmed: true,
+        block_height: 100_000,
+        block_hash:
+          '000000000003ba27aa200b1cecaad478d2b00432346c3f1f3986da1afd33e506',
+        block_time: 1_293_623_863
+      }
+    }
+    const MINER_BLOCK_JSON = {
+      extras: { pool: { id: 1, name: 'TestPool', slug: 'testpool' } }
+    }
+
+    function mockFetchOk(body: unknown) {
+      return spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify(body), { status: 200 })
+      )
+    }
+
+    function mockFetchSequence(bodies: unknown[]) {
+      const spy = spyOn(globalThis, 'fetch')
+      for (const body of bodies) {
+        spy.mockResolvedValueOnce(
+          new Response(JSON.stringify(body), { status: 200 })
+        )
+      }
+      return spy
+    }
+
+    afterEach(() => {
+      ;(
+        globalThis.fetch as unknown as { mockRestore?: () => void }
+      ).mockRestore?.()
+    })
+
+    it('decodes txid offline (no fetch) and echoes it back lowercased', async () => {
+      const result = await decode(TXID.toUpperCase())
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'transaction') {
+        return
+      }
+      expect(result.txid).toBe(TXID)
+      expect(result.data).toBeUndefined()
+    })
+
+    it('treats non-64-hex strings as non-tx (unknown format)', async () => {
+      const result = await decode('zzz_not_a_txid')
+
+      expect(result.valid).toBe(false)
+      if (result.valid) {
+        return
+      }
+      expect(result.errorCode).toBe('UNKNOWN_FORMAT')
+    })
+
+    it('fetches transaction data when fetch=true and hits default mainnet endpoint', async () => {
+      const fetchSpy = mockFetchOk(ESPLORA_TX_JSON)
+
+      const result = await decode(TXID, { transaction: { fetch: true } })
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'transaction') {
+        return
+      }
+      expect(result.data).toBeDefined()
+      expect(result.data?.network).toBe('mainnet')
+      expect(result.data?.fee).toBe(0)
+      expect(result.data?.totalInput).toBe(5_000_000_000)
+      expect(result.data?.totalOutput).toBe(4_000_000_000)
+      expect(result.data?.vsize).toBe(275)
+      expect(fetchSpy).toHaveBeenCalledTimes(1)
+      const url = fetchSpy.mock.calls[0][0] as string
+      expect(url).toBe(`https://mempool.space/api/tx/${TXID}`)
+    })
+
+    it('uses testnet4 endpoint when network=testnet', async () => {
+      const fetchSpy = mockFetchOk(ESPLORA_TX_JSON)
+
+      await decode(TXID, {
+        transaction: { fetch: true, network: 'testnet' }
+      })
+
+      const url = fetchSpy.mock.calls[0][0] as string
+      expect(url).toBe(`https://mempool.space/testnet4/api/tx/${TXID}`)
+    })
+
+    it('uses signet endpoint when network=signet', async () => {
+      const fetchSpy = mockFetchOk(ESPLORA_TX_JSON)
+
+      await decode(TXID, {
+        transaction: { fetch: true, network: 'signet' }
+      })
+
+      const url = fetchSpy.mock.calls[0][0] as string
+      expect(url).toBe(`https://mempool.space/signet/api/tx/${TXID}`)
+    })
+
+    it('uses custom endpoint when provided and strips trailing slash', async () => {
+      const fetchSpy = mockFetchOk(ESPLORA_TX_JSON)
+
+      await decode(TXID, {
+        transaction: {
+          fetch: true,
+          endpoint: 'http://localhost:3000/api/'
+        }
+      })
+
+      const url = fetchSpy.mock.calls[0][0] as string
+      expect(url).toBe(`http://localhost:3000/api/tx/${TXID}`)
+    })
+
+    it('returns TX_FETCH_ERROR when regtest has no endpoint', async () => {
+      const result = await decode(TXID, {
+        transaction: { fetch: true, network: 'regtest' }
+      })
+
+      expect(result.valid).toBe(false)
+      if (result.valid) {
+        return
+      }
+      expect(result.errorCode).toBe('TX_FETCH_ERROR')
+    })
+
+    it('decodes coinbase: isCoinbase=true, no prevout, totalInput=0', async () => {
+      mockFetchOk(COINBASE_TX_JSON)
+
+      const result = await decode(COINBASE_TXID, {
+        transaction: { fetch: true }
+      })
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'transaction') {
+        return
+      }
+      expect(result.data?.inputs[0].isCoinbase).toBe(true)
+      expect(result.data?.inputs[0].prevout).toBeUndefined()
+      expect(result.data?.totalInput).toBe(0)
+    })
+
+    it('fetches miner pool when fetchMiner=true and tx is confirmed', async () => {
+      const fetchSpy = mockFetchSequence([ESPLORA_TX_JSON, MINER_BLOCK_JSON])
+
+      const result = await decode(TXID, {
+        transaction: { fetch: true, fetchMiner: true }
+      })
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'transaction') {
+        return
+      }
+      expect(result.data?.miner).toEqual({ name: 'TestPool', slug: 'testpool' })
+      expect(fetchSpy).toHaveBeenCalledTimes(2)
+      const blockUrl = fetchSpy.mock.calls[1][0] as string
+      expect(blockUrl).toBe(
+        `https://mempool.space/api/v1/block/${ESPLORA_TX_JSON.status.block_hash}`
+      )
+    })
+
+    it('omits miner when fetchMiner=true and block pool is missing', async () => {
+      mockFetchSequence([ESPLORA_TX_JSON, { extras: {} }])
+
+      const result = await decode(TXID, {
+        transaction: { fetch: true, fetchMiner: true }
+      })
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'transaction') {
+        return
+      }
+      expect(result.data?.miner).toBeUndefined()
+    })
+
+    it('returns TX_NOT_FOUND on 404 from indexer', async () => {
+      spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response('Not Found', { status: 404 })
+      )
+
+      const result = await decode(TXID, { transaction: { fetch: true } })
+
+      expect(result.valid).toBe(false)
+      if (result.valid) {
+        return
+      }
+      expect(result.errorCode).toBe('TX_NOT_FOUND')
+    })
+
+    it('returns TX_FETCH_ERROR on non-200/404 indexer response', async () => {
+      spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response('Server Error', { status: 500 })
+      )
+
+      const result = await decode(TXID, { transaction: { fetch: true } })
+
+      expect(result.valid).toBe(false)
+      if (result.valid) {
+        return
+      }
+      expect(result.errorCode).toBe('TX_FETCH_ERROR')
+    })
+
+    it('returns TX_TIMEOUT when AbortController fires', async () => {
+      spyOn(globalThis, 'fetch').mockImplementation((_url, init) => {
+        return new Promise((_resolve, reject) => {
+          const signal = (init as RequestInit | undefined)?.signal
+          signal?.addEventListener('abort', () => {
+            const err = new Error('aborted')
+            err.name = 'AbortError'
+            reject(err)
+          })
+        })
+      })
+
+      const result = await decode(TXID, {
+        transaction: { fetch: true, timeout: 10 }
+      })
+
+      expect(result.valid).toBe(false)
+      if (result.valid) {
+        return
+      }
+      expect(result.errorCode).toBe('TX_TIMEOUT')
+    })
+  })
 })

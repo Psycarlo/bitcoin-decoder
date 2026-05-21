@@ -17,6 +17,7 @@ import { LNURL_PREFIX, lnurl } from './utils/lnurl'
 import { getNetwork } from './utils/network'
 import { NOSTR_PREFIXES, nostr } from './utils/nostr'
 import { fetchProfile } from './utils/nostr-profile'
+import { fetchTransactionData, isTxId } from './utils/transaction'
 
 const BIP321_PREFIX = 'bitcoin:'
 const LIGHTNING_PREFIX = 'lightning:'
@@ -249,6 +250,14 @@ async function decode(
       const entity = await enrichWithProfile(nostr(input), opts)
       return { valid: true, kind: 'nostr', input, entity }
     }
+    if (isTxId(input)) {
+      const txid = input.toLowerCase()
+      if (!opts.transaction?.fetch) {
+        return { valid: true, kind: 'transaction', input, txid }
+      }
+      const data = await fetchTransactionData(txid, opts.transaction)
+      return { valid: true, kind: 'transaction', input, txid, data }
+    }
     return { valid: true, kind: 'payment', ...(await decodeInput(input)) }
   } catch (error) {
     return { ...getErrorCode(error), input }
@@ -256,12 +265,14 @@ async function decode(
 }
 
 export { decode }
+export { MEMPOOL_ENDPOINTS } from './constants/mempool-endpoints'
 export type { NostrRelayUrl } from './constants/nostr-relays'
 export { DEFAULT_NOSTR_RELAYS, NOSTR_RELAYS } from './constants/nostr-relays'
 export type {
   DecodedData,
   DecodedNostr,
   DecodedPayment,
+  DecodedTransaction,
   DecodeOptions,
   Destination,
   Metadata,
@@ -271,6 +282,15 @@ export type {
   NostrProfile,
   ParsedLNAddress,
   ProfileFetchResult,
+  ScriptPubKeyType,
+  TransactionData,
+  TransactionDecodeOptions,
+  TransactionNetwork,
+  TxInput,
+  TxMiner,
+  TxOutput,
+  TxPrevout,
+  TxStatus,
   WellKnown
 } from './types'
 export { wellKnown } from './utils/lightning-address'

@@ -52,6 +52,10 @@ export type ErrorCode =
   | 'INVALID_LNURL'
   | 'INVALID_NIP19'
   | 'NO_PAYMENT_METHODS'
+  | 'INVALID_TXID'
+  | 'TX_NOT_FOUND'
+  | 'TX_FETCH_ERROR'
+  | 'TX_TIMEOUT'
 
 export type NostrProfile = {
   name?: string
@@ -116,8 +120,31 @@ export type NostrDecodeOptions = {
   verify?: boolean
 }
 
+/** Bitcoin network for transaction lookup.
+ *
+ *  Note: `testnet` resolves to testnet4 (testnet3 is being deprecated).
+ *  `regtest` requires an explicit endpoint override.
+ */
+export type TransactionNetwork = 'mainnet' | 'testnet' | 'signet' | 'regtest'
+
+export type TransactionDecodeOptions = {
+  /** When true, fetch transaction data from the indexer. Default false. */
+  fetch?: boolean
+  /** Network the txid belongs to. Default 'mainnet'. */
+  network?: TransactionNetwork
+  /** Indexer base URL override (self-host, esplora, blockstream).
+   *  Defaults to the mempool.space URL for the chosen network. */
+  endpoint?: string
+  /** When true, fetch block extras to populate the miner pool name.
+   *  Requires a mempool.space-compatible endpoint. Default false. */
+  fetchMiner?: boolean
+  /** Max time to wait per HTTP request, in ms. Default 5000. */
+  timeout?: number
+}
+
 export type DecodeOptions = {
   nostr?: NostrDecodeOptions
+  transaction?: TransactionDecodeOptions
 }
 
 export type ParsedLNAddress = {
@@ -166,7 +193,99 @@ export type DecodedNostr = {
   entity: NostrEntity
 }
 
-export type DecodedData = DecodedPayment | DecodedNostr | DecodedError
+export type ScriptPubKeyType =
+  | 'p2pk'
+  | 'p2pkh'
+  | 'p2sh'
+  | 'v0_p2wpkh'
+  | 'v0_p2wsh'
+  | 'v1_p2tr'
+  | 'op_return'
+  | 'multisig'
+  | 'unknown'
+
+export type TxPrevout = {
+  /** Decoded address when the script is standard. Absent for OP_RETURN or non-standard scripts. */
+  address?: string
+  addressType?: BitcoinAddressType
+  /** Amount in sats */
+  value: number
+  scriptPubKeyType: ScriptPubKeyType
+}
+
+export type TxInput = {
+  /** Source transaction id. */
+  txid: string
+  /** Source output index. */
+  vout: number
+  /** Spent output. Absent for coinbase inputs. */
+  prevout?: TxPrevout
+  sequence: number
+  witness?: string[]
+  isCoinbase: boolean
+}
+
+export type TxOutput = {
+  /** Decoded address when the script is standard. Absent for OP_RETURN or non-standard scripts. */
+  address?: string
+  addressType?: BitcoinAddressType
+  /** Amount in sats */
+  value: number
+  scriptPubKeyType: ScriptPubKeyType
+}
+
+export type TxStatus = {
+  confirmed: boolean
+  blockHeight?: number
+  blockHash?: string
+  /** Block timestamp in unix seconds. */
+  blockTime?: number
+}
+
+export type TxMiner = {
+  name: string
+  slug?: string
+}
+
+export type TransactionData = {
+  /** Bitcoin network the transaction belongs to (from opts). */
+  network: TransactionNetwork
+  status: TxStatus
+  /** Fee in sats. */
+  fee: number
+  /** Fee rate in sat/vB. */
+  feeRate: number
+  /** Sum of prevout values in sats. Zero for coinbase. */
+  totalInput: number
+  /** Sum of vout values in sats. */
+  totalOutput: number
+  size: number
+  vsize: number
+  weight: number
+  version: number
+  locktime: number
+  inputs: TxInput[]
+  outputs: TxOutput[]
+  /** Present only when fetchMiner is true and the tx is confirmed. */
+  miner?: TxMiner
+}
+
+export type DecodedTransaction = {
+  valid: true
+  kind: 'transaction'
+  /** Raw text passed by the user */
+  input: Input
+  /** Transaction id (echo of input, lowercased). */
+  txid: string
+  /** Full transaction data. Present only when `opts.transaction.fetch === true`. */
+  data?: TransactionData
+}
+
+export type DecodedData =
+  | DecodedPayment
+  | DecodedNostr
+  | DecodedTransaction
+  | DecodedError
 
 export class DecodeError extends Error {
   code: ErrorCode
