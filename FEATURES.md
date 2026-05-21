@@ -55,8 +55,21 @@ Note: `Network` type collapses signet and regtest into `testnet`.
 - [x] Configurable relays, timeout, and schnorr signature verification via `NostrDecodeOptions`
 - [x] Default public relay set exported as `DEFAULT_NOSTR_RELAYS` / `NOSTR_RELAYS`
 
+## Transactions
+
+- [x] Bitcoin transaction id (64-char hex) — offline validation + lowercase normalization
+- [x] Optional full transaction lookup via esplora-compatible HTTP endpoint (`decode(txid, { transaction: { fetch: true } })`)
+- [x] Networks: mainnet, testnet (testnet4), signet, regtest (regtest requires explicit `endpoint`)
+- [x] Default endpoints to mempool.space; configurable via `endpoint` (esplora, blockstream.info, self-hosted, Tor)
+- [x] Fields: confirmation status, block height/hash/time, fee (sats), fee rate (sat/vB), size, vsize, weight, version, locktime, totalInput, totalOutput
+- [x] Inputs: prevout txid+vout, prevout value/address/scriptPubKeyType, sequence, witness, coinbase detection
+- [x] Outputs: value (sats), address, addressType, scriptPubKeyType (`p2pk`, `p2pkh`, `p2sh`, `v0_p2wpkh`, `v0_p2wsh`, `v1_p2tr`, `op_return`, `multisig`, `unknown`)
+- [x] Optional miner pool name via mempool.space `/v1/block` extras (`fetchMiner: true`)
+- [x] Errors: `INVALID_TXID`, `TX_NOT_FOUND`, `TX_FETCH_ERROR`, `TX_TIMEOUT`
+
 ## Metadata
 
 - [x] Amount in sats (BOLT11, BIP-321)
 - [x] Description / label / message (BOLT11, BOLT12, BIP-321)
 - [x] Nostr profile metadata (name, displayName, about, picture, banner, nip05, lud06, lud16, website, bot)
+- [x] Transaction fee, fee rate, totals, inputs/outputs (see Transactions)
