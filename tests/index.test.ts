@@ -1,11 +1,14 @@
 // @ts-nocheck
-import { describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, spyOn } from 'bun:test'
+import { SimplePool } from 'nostr-tools/pool'
 import { decode, wellKnown } from '../src'
 import { ArkAddresses } from './fixtures/ark'
 import { bip321URIs } from './fixtures/bip-321'
 import { bitcoinAddresses } from './fixtures/bitcoin'
 import { lightningAddresses } from './fixtures/lightning-address'
 import { lnurls } from './fixtures/lnurl'
+import { nostrEntities } from './fixtures/nostr'
+import { nostrProfileFixtures } from './fixtures/nostr-profile'
 
 describe('Bitcoin Decode', () => {
   describe('Bolt11', () => {
@@ -750,6 +753,268 @@ describe('Bitcoin Decode', () => {
       expect(result.input).toBe(input)
       expect(result.errorCode).toBe('INVALID_CHECKSUM')
       expect(result.errorMessage).toBeDefined()
+    })
+  })
+
+  describe('Nostr (NIP-19)', () => {
+    it('should decode an npub', async () => {
+      const input = nostrEntities.npub.valid
+      const result = await decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.kind).toBe('nostr')
+      expect(result.input).toBe(input)
+      expect(result.entity.type).toBe('npub')
+      expect(result.entity.data.hex).toBe(nostrEntities.npub.pubkeyHex)
+    })
+
+    it('should decode an nsec', async () => {
+      const input = nostrEntities.nsec.valid
+      const result = await decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.kind).toBe('nostr')
+      expect(result.entity.type).toBe('nsec')
+      expect(result.entity.data.hex).toBe(nostrEntities.nsec.privkeyHex)
+    })
+
+    it('should decode a note', async () => {
+      const input = nostrEntities.note.valid
+      const result = await decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.kind).toBe('nostr')
+      expect(result.entity.type).toBe('note')
+      expect(result.entity.data.hex).toBe(nostrEntities.note.eventIdHex)
+    })
+
+    it('should decode an nprofile with relays', async () => {
+      const input = nostrEntities.nprofile.valid
+      const result = await decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.kind).toBe('nostr')
+      expect(result.entity.type).toBe('nprofile')
+      expect(result.entity.data.pubkey).toBe(nostrEntities.nprofile.pubkeyHex)
+      expect(result.entity.data.relays).toEqual(nostrEntities.nprofile.relays)
+    })
+
+    it('should decode an nevent with author and kind', async () => {
+      const input = nostrEntities.nevent.valid
+      const result = await decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.kind).toBe('nostr')
+      expect(result.entity.type).toBe('nevent')
+      expect(result.entity.data.id).toBe(nostrEntities.nevent.idHex)
+      expect(result.entity.data.author).toBe(nostrEntities.nevent.authorHex)
+      expect(result.entity.data.kind).toBe(nostrEntities.nevent.kind)
+      expect(result.entity.data.relays).toEqual(nostrEntities.nevent.relays)
+    })
+
+    it('should decode an naddr', async () => {
+      const input = nostrEntities.naddr.valid
+      const result = await decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.kind).toBe('nostr')
+      expect(result.entity.type).toBe('naddr')
+      expect(result.entity.data.identifier).toBe(nostrEntities.naddr.identifier)
+      expect(result.entity.data.author).toBe(nostrEntities.naddr.authorHex)
+      expect(result.entity.data.kind).toBe(nostrEntities.naddr.kind)
+      expect(result.entity.data.relays).toEqual(nostrEntities.naddr.relays)
+    })
+
+    it('should return invalid for an npub with bad checksum', async () => {
+      const input = nostrEntities.invalid.checksum
+      const result = await decode(input)
+
+      expect(result.valid).toBe(false)
+      if (result.valid) {
+        return
+      }
+      expect(result.errorCode).toBe('INVALID_NIP19')
+    })
+  })
+
+  describe('Nostr profile fetch (mocked)', () => {
+    let querySpy: ReturnType<typeof spyOn>
+    let closeSpy: ReturnType<typeof spyOn>
+
+    beforeEach(() => {
+      querySpy = spyOn(SimplePool.prototype, 'querySync')
+      closeSpy = spyOn(SimplePool.prototype, 'close').mockImplementation(
+        () => undefined
+      )
+    })
+
+    afterEach(() => {
+      querySpy.mockRestore()
+      closeSpy.mockRestore()
+    })
+
+    it('skips profile fetch by default', async () => {
+      const result = await decode(nostrProfileFixtures.npub)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'nostr') {
+        return
+      }
+      if (result.entity.type !== 'npub') {
+        return
+      }
+      expect(result.entity.data.profile).toBeUndefined()
+      expect(querySpy).not.toHaveBeenCalled()
+    })
+
+    it('returns ok status with parsed profile for npub', async () => {
+      querySpy.mockResolvedValue([nostrProfileFixtures.validEvent])
+
+      const result = await decode(nostrProfileFixtures.npub, {
+        nostr: { fetchProfile: true }
+      })
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'nostr') {
+        return
+      }
+      if (result.entity.type !== 'npub') {
+        return
+      }
+      const profile = result.entity.data.profile
+      expect(profile?.status).toBe('ok')
+      if (profile?.status !== 'ok') {
+        return
+      }
+      expect(profile.data.name).toBe('alice')
+      expect(profile.data.displayName).toBe('Alice')
+      expect(profile.data.nip05).toBe('alice@example.com')
+      expect(profile.data.lud16).toBe('alice@wallet.example')
+      expect(profile.data.website).toBe('https://alice.example')
+      expect(profile.data.bot).toBe(false)
+    })
+
+    it('returns not-found when relays yield no events', async () => {
+      querySpy.mockResolvedValue([])
+
+      const result = await decode(nostrProfileFixtures.npub, {
+        nostr: { fetchProfile: true }
+      })
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'nostr') {
+        return
+      }
+      if (result.entity.type !== 'npub') {
+        return
+      }
+      expect(result.entity.data.profile?.status).toBe('not-found')
+    })
+
+    it('returns error when pool throws', async () => {
+      querySpy.mockRejectedValue(new Error('boom'))
+
+      const result = await decode(nostrProfileFixtures.npub, {
+        nostr: { fetchProfile: true }
+      })
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'nostr') {
+        return
+      }
+      if (result.entity.type !== 'npub') {
+        return
+      }
+      const profile = result.entity.data.profile
+      expect(profile?.status).toBe('error')
+      if (profile?.status === 'error') {
+        expect(profile.message).toBe('boom')
+      }
+    })
+
+    it('returns error when content is malformed JSON', async () => {
+      querySpy.mockResolvedValue([nostrProfileFixtures.malformedContent])
+
+      const result = await decode(nostrProfileFixtures.npub, {
+        nostr: { fetchProfile: true, verify: false }
+      })
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'nostr') {
+        return
+      }
+      if (result.entity.type !== 'npub') {
+        return
+      }
+      const profile = result.entity.data.profile
+      expect(profile?.status).toBe('error')
+      if (profile?.status === 'error') {
+        expect(profile.message).toBe('Invalid profile JSON')
+      }
+    })
+
+    it('rejects events with bad signatures when verify is true', async () => {
+      querySpy.mockResolvedValue([nostrProfileFixtures.badSig])
+
+      const result = await decode(nostrProfileFixtures.npub, {
+        nostr: { fetchProfile: true, verify: true }
+      })
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'nostr') {
+        return
+      }
+      if (result.entity.type !== 'npub') {
+        return
+      }
+      const profile = result.entity.data.profile
+      expect(profile?.status).toBe('error')
+      if (profile?.status === 'error') {
+        expect(profile.message).toBe('Invalid event signature')
+      }
+    })
+
+    it('selects newest event when multiple are returned', async () => {
+      querySpy.mockResolvedValue([
+        nostrProfileFixtures.oldEvent,
+        nostrProfileFixtures.newerEvent,
+        nostrProfileFixtures.validEvent
+      ])
+
+      const result = await decode(nostrProfileFixtures.npub, {
+        nostr: { fetchProfile: true, verify: false }
+      })
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'nostr') {
+        return
+      }
+      if (result.entity.type !== 'npub') {
+        return
+      }
+      const profile = result.entity.data.profile
+      expect(profile?.status).toBe('ok')
+      if (profile?.status === 'ok') {
+        expect(profile.data.name).toBe('newest-alice')
+      }
     })
   })
 })

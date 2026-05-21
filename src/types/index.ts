@@ -1,3 +1,5 @@
+import type { NostrRelayUrl } from '../constants/nostr-relays'
+
 export type Input = string
 
 /** Bitcoin network
@@ -48,7 +50,75 @@ export type ErrorCode =
   | 'INVALID_BIP321'
   | 'INVALID_LNADDRESS'
   | 'INVALID_LNURL'
+  | 'INVALID_NIP19'
   | 'NO_PAYMENT_METHODS'
+
+export type NostrProfile = {
+  name?: string
+  displayName?: string
+  about?: string
+  picture?: string
+  banner?: string
+  nip05?: string
+  lud06?: string
+  lud16?: string
+  website?: string
+  bot?: boolean
+}
+
+export type ProfileFetchResult =
+  | { status: 'ok'; data: NostrProfile }
+  | { status: 'not-found' }
+  | { status: 'timeout' }
+  | { status: 'error'; message: string }
+
+export type NostrEntity =
+  | {
+      type: 'npub'
+      data: { hex: string; profile?: ProfileFetchResult }
+    }
+  | { type: 'nsec' | 'note'; data: { hex: string } }
+  | {
+      type: 'nprofile'
+      data: {
+        pubkey: string
+        relays: string[]
+        profile?: ProfileFetchResult
+      }
+    }
+  | {
+      type: 'nevent'
+      data: {
+        id: string
+        relays: string[]
+        author?: string
+        kind?: number
+      }
+    }
+  | {
+      type: 'naddr'
+      data: {
+        identifier: string
+        relays: string[]
+        author: string
+        kind: number
+      }
+    }
+
+export type NostrDecodeOptions = {
+  /** When true, fetch kind 0 metadata for npub/nprofile inputs. Default false. */
+  fetchProfile?: boolean
+  /** Relays to query. Defaults to a small public set. */
+  relays?: NostrRelayUrl[]
+  /** Max time to wait for events across all relays, in ms. Default 5000. */
+  timeout?: number
+  /** When true, verify schnorr signature of profile event. Default true. */
+  verify?: boolean
+}
+
+export type DecodeOptions = {
+  nostr?: NostrDecodeOptions
+}
 
 export type ParsedLNAddress = {
   username: string
@@ -87,7 +157,16 @@ export type DecodedError = {
   errorCode: ErrorCode
 }
 
-export type DecodedData = DecodedPayment | DecodedError
+export type DecodedNostr = {
+  valid: true
+  kind: 'nostr'
+  /** Raw text passed by the user */
+  input: Input
+  /** Decoded NIP-19 entity */
+  entity: NostrEntity
+}
+
+export type DecodedData = DecodedPayment | DecodedNostr | DecodedError
 
 export class DecodeError extends Error {
   code: ErrorCode
