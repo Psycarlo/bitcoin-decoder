@@ -19,7 +19,7 @@ jobs:
       - name: Type check
         run: bun run type-check
       - name: Test
-        run: bun test
+        run: bun run test
 
   publish:
     name: Publish to npm
@@ -27,8 +27,9 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write
       id-token: write
+      attestations: write
 
     steps:
       - uses: actions/checkout@v4
@@ -47,6 +48,32 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Upgrade npm for Trusted Publishing
+        run: npm install -g npm@latest
+
+      - name: Pack tarball
+        run: |
+          mkdir -p dist-pack
+          npm pack --pack-destination dist-pack
+
+      - name: Attest build provenance
+        id: attest
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: 'dist-pack/*.tgz'
+
+      - name: Stage attestation as release asset
+        run: |
+          PKG_VERSION="${GITHUB_REF_NAME#v}"
+          cp "${{ steps.attest.outputs.bundle-path }}" \
+            "dist-pack/bitcoin-decoder-${PKG_VERSION}.attestation.intoto.jsonl"
+
+      - name: Publish to npm
+        run: npm publish dist-pack/*.tgz --provenance --access public
+
+      - name: Upload assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist-pack/*.tgz
+            dist-pack/*.attestation.intoto.jsonl
