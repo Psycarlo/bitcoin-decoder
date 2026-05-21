@@ -1,3 +1,5 @@
+import type { NostrRelayUrl } from '../constants/nostr-relays'
+
 export type Input = string
 
 /** Bitcoin network
@@ -107,7 +109,7 @@ export type NostrDecodeOptions = {
   /** When true, fetch kind 0 metadata for npub/nprofile inputs. Default false. */
   fetchProfile?: boolean
   /** Relays to query. Defaults to a small public set. */
-  relays?: string[]
+  relays?: NostrRelayUrl[]
   /** Max time to wait for events across all relays, in ms. Default 5000. */
   timeout?: number
   /** When true, verify schnorr signature of profile event. Default true. */
