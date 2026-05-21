@@ -43,7 +43,20 @@ What `bitcoin-decoder` can currently decode.
 
 Note: `Network` type collapses signet and regtest into `testnet`.
 
+## Nostr
+
+- [x] NIP-19 `npub` (public key)
+- [x] NIP-19 `nsec` (secret key)
+- [x] NIP-19 `note` (event id)
+- [x] NIP-19 `nprofile` (pubkey + relay hints)
+- [x] NIP-19 `nevent` (event id + relay hints, optional author and kind)
+- [x] NIP-19 `naddr` (parameterized replaceable event coordinate)
+- [x] Optional kind-0 profile fetch over relays for `npub` and `nprofile` (`decode(input, { nostr: { fetchProfile: true } })`)
+- [x] Configurable relays, timeout, and schnorr signature verification via `NostrDecodeOptions`
+- [x] Default public relay set exported as `DEFAULT_NOSTR_RELAYS` / `NOSTR_RELAYS`
+
 ## Metadata
 
 - [x] Amount in sats (BOLT11, BIP-321)
 - [x] Description / label / message (BOLT11, BOLT12, BIP-321)
+- [x] Nostr profile metadata (name, displayName, about, picture, banner, nip05, lud06, lud16, website, bot)
