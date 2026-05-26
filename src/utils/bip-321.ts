@@ -41,23 +41,44 @@ function getMetadata(result: BIP321ParseResult): Metadata | undefined {
   return { amount, description }
 }
 
+/** Merge URI-level metadata with rail-embedded metadata.
+ *  Embedded values (BOLT11/BOLT12) are authoritative when defined and override
+ *  the URI hint. Undefined embedded fields fall back to URI values. */
+function mergeMetadata(
+  uri?: Metadata,
+  embedded?: Metadata
+): Metadata | undefined {
+  const amount = embedded?.amount ?? uri?.amount
+  const description = embedded?.description ?? uri?.description
+
+  if (amount === undefined && description === undefined) {
+    return undefined
+  }
+
+  return { amount, description }
+}
+
 async function mapPaymentMethod(
   paymentMethod: PaymentMethod & { type: SupportedPaymentType },
   metadata?: Metadata
 ): Promise<ParsedDestination> {
   if (paymentMethod.type === 'lightning') {
     if (paymentMethod.value.includes('@')) {
-      return await lightningAddress(paymentMethod.value)
+      const parsed = await lightningAddress(paymentMethod.value)
+      return { ...parsed, metadata: mergeMetadata(metadata, parsed.metadata) }
     }
-    return bolt11(paymentMethod.value)
+    const parsed = bolt11(paymentMethod.value)
+    return { ...parsed, metadata: mergeMetadata(metadata, parsed.metadata) }
   }
 
   if (paymentMethod.type === 'offer') {
-    return bolt12(paymentMethod.value)
+    const parsed = bolt12(paymentMethod.value)
+    return { ...parsed, metadata: mergeMetadata(metadata, parsed.metadata) }
   }
 
   if (paymentMethod.type === 'ark') {
-    return ark(paymentMethod.value)
+    const parsed = ark(paymentMethod.value)
+    return { ...parsed, metadata }
   }
 
   const parsed = bitcoin(paymentMethod.value)

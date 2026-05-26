@@ -242,6 +242,48 @@ describe('Bitcoin Decode', () => {
       expect(result.destinations[1]?.protocol).toBe('ark')
     })
 
+    it('should propagate URI metadata to an ark-first destination', async () => {
+      const arkAddr = ArkAddresses.testnet.valid.bark
+      const input = `bitcoin:?ark=${arkAddr}&amount=0.0001&label=Coffee&message=Thanks`
+      const result = await decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.destination.type).toBe('ark-address')
+      expect(result.metadata?.amount).toBe(10_000)
+      expect(result.metadata?.description).toBe('Thanks')
+    })
+
+    it('should let BOLT11 invoice amount win over URI amount', async () => {
+      const lightning =
+        'LNTBS10U1P5ET0Y3SP5CP3SP45T3HH84T08GCF49YE8ATHRYY36VJYM5Q0R65SJXEN5QKEQPP57M9WEES47JHE83CJVTYALN0LPFNE90SCFVYHK630EKLRPNUVFGQQDQ4G9EXKGZNW3HHYEFQYVENSXQZJCCQP2RZJQ2V454H7KJLFX9C6KCFEPRD4D7LSN4CMHSNGYUVMX9PR6LMEPGU0CPZS3YQQQTQQQQQQQQQPQQQQQZSQQC9QXPQYSGQSXUDQ7YY8NQ4LMCT42EQ6RHQ4RL76W2U89W35NAS4DJCDYW4DVZ9QS40TA8S9NU8SYPWZR6HPSDELGAURN8NW0MR69NNMKE7NMMA25SQNXEYJ0'
+      const input = `bitcoin:?amount=0.5&lightning=${lightning}`
+      const result = await decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.destination.type).toBe('bolt11')
+      expect(result.metadata?.amount).toBe(1000)
+      expect(result.metadata?.description).toBe('Ark Store #38')
+    })
+
+    it('should propagate URI amount when both ark and lightning are present', async () => {
+      const arkAddr = ArkAddresses.testnet.valid.bark
+      const input = `bitcoin:?ark=${arkAddr}&amount=0.00042`
+      const result = await decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.destination.type).toBe('ark-address')
+      expect(result.metadata?.amount).toBe(42_000)
+    })
+
     it('should decode a BIP-321 URI with bolt12 offer parameter', async () => {
       const offer =
         'lno1pqps7sjqpgz9getnwsgwuquxfmcztl0gldv8mxy3sm8x5jscdz27u39fy6luxu8zcdn9j73l3upsh07rk5jt5kkev5xadp5d3hulrgyv0m3u4h20h2gz7tzntd45huszqgxxjs85lxz5rc0r3uwfrwgk92pp2a5rdpx9cjrjvjhqyc5x5dkyvqpnclwrc8k5z8atcvvptlwv9dty80qt7378lxt0nhpezz8m9zxzulxftqf399m279led8889uy3rssvlwgmwqpfvg8m5qksdsz8pnhhyvlcgkplzvngwftzjd32qps35mql888hd6sqx2g5k9al75w4p4apqa9gay0gwsquw2pjaqhvuvvmws7k5wan4fae3c3tnt33qh85lekwevhqvaqw5nk2hc'
