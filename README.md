@@ -1,7 +1,7 @@
 ![bitcoin-decoder](https://github.com/Psycarlo/bitcoin-decoder/blob/main/hero.png)
 
 <p align="center">
-  <a href="https://bitcoin.psycarlo.com" target="_blank" rel="noopener"><img src="https://www.shieldcn.dev/badge/Homepage-link-2563eb.svg?variant=ghost&size=sm" alt="Homepage" /></a>
+  <a href="https://bitcoin.psycarlo.com" target="_blank" rel="noopener"><img src="https://www.shieldcn.dev/badge/Homepage-link-2563eb.svg?variant=branded&size=sm&theme=amber&mode=light&color=27272a" alt="Homepage" /></a>
   <img src="https://www.shieldcn.dev/npm/bitcoin-decoder.svg?variant=secondary&size=sm" alt="npm Version" />
   <img src="https://www.shieldcn.dev/github/license/Psycarlo/bitcoin-decoder.svg?variant=ghost&size=sm" alt="License" />
 </p>
