@@ -67,8 +67,5 @@
   "homepage": "https://github.com/Psycarlo/bitcoin-decoder#readme",
   "engines": {
     "node": ">=22"
-  },
-  "workspaces": [
-    "website"
-  ]
+  }
 }
