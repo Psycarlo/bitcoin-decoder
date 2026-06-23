@@ -14,8 +14,9 @@ function validate(input: Input): void {
     const decoded = bech32m.decode(input as `${string}1${string}`, 1023)
     prefix = decoded.prefix
     words = decoded.words
-  } catch {
-    throw new DecodeError('Invalid bech32m checksum', 'INVALID_CHECKSUM')
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    throw new DecodeError(`Invalid ark address: ${message}`, 'INVALID_CHECKSUM')
   }
 
   if (!ARK_PREFIXES.includes(prefix)) {
