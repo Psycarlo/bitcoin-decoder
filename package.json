@@ -1,6 +1,6 @@
 {
   "name": "bitcoin-decoder",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Decode all things bitcoin",
   "type": "module",
   "exports": {
