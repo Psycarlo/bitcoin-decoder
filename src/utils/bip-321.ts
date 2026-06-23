@@ -105,11 +105,15 @@ async function parse(result: BIP321ParseResult): Promise<ParsedDestination[]> {
 async function bip321(input: Input): Promise<ParsedDestination[]> {
   const result = parseBIP321(input)
 
-  if (!result.valid) {
+  // parse() already drops invalid/unsupported rails, so a single bad rail must
+  // not reject the whole URI. Only fail when no usable method remains.
+  const parsed = await parse(result)
+
+  if (parsed.length === 0) {
     throw new Error(`Invalid BIP-321 URI: ${result.errors.join(', ')}`)
   }
 
-  return await parse(result)
+  return parsed
 }
 
 export { bip321 }
