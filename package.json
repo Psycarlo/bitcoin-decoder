@@ -21,7 +21,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "bun test tests/index.test.ts",
+    "test": "bun test tests/index.test.ts tests/normalize.test.ts",
     "test:coverage": "bun test --coverage",
     "test:live": "bun test tests/live.test.ts",
     "type-check": "tsc --noEmit",
