@@ -1,5 +1,6 @@
 import { type DecodedInvoice, decode, type Section } from 'light-bolt11-decoder'
 import type { ParsedDestination } from '../types'
+import { normalizeDestinationValue } from './normalize'
 
 function getSection<T extends Section['name']>(
   decodedInvoice: DecodedInvoice,
@@ -16,7 +17,7 @@ function parse(decodedInvoice: DecodedInvoice): ParsedDestination {
 
   return {
     destination: {
-      value: decodedInvoice.paymentRequest,
+      value: normalizeDestinationValue(decodedInvoice.paymentRequest),
       protocol: 'lightning',
       type: 'bolt11'
     },

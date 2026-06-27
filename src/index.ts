@@ -9,6 +9,7 @@ import { extendedKey, isExtendedKey } from './utils/extended-key'
 import { lightningAddress } from './utils/lightning-address'
 import { LNURL_PREFIX, lnurl } from './utils/lnurl'
 import { getNetwork } from './utils/network'
+import { normalizeHex } from './utils/normalize'
 import { NOSTR_PREFIXES, nostr } from './utils/nostr'
 import { fetchProfile } from './utils/nostr-profile'
 import { isPsbt, psbt } from './utils/psbt'
@@ -267,7 +268,7 @@ async function decode(
       return { valid: true, kind: 'psbt', input, data: psbt(input, opts.psbt) }
     }
     if (isTxId(input)) {
-      const txid = input.toLowerCase()
+      const txid = normalizeHex(input)
       if (!opts.transaction?.fetch) {
         return { valid: true, kind: 'transaction', input, txid }
       }

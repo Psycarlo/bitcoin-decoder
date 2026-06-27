@@ -5,6 +5,8 @@ import { decode, wellKnown } from '../src'
 import { ArkAddresses } from './fixtures/ark'
 import { bip321URIs } from './fixtures/bip-321'
 import { bitcoinAddresses } from './fixtures/bitcoin'
+import { bolt11Invoices } from './fixtures/bolt11'
+import { bolt12Offers } from './fixtures/bolt12'
 import { extendedKeys } from './fixtures/extended-key'
 import { lightningAddresses } from './fixtures/lightning-address'
 import { lnurls } from './fixtures/lnurl'
@@ -15,8 +17,7 @@ import { psbts } from './fixtures/psbt'
 describe('Bitcoin Decode', () => {
   describe('Bolt11', () => {
     it('should decode a testnet bolt11 invoice', async () => {
-      const input =
-        'lntbs10u1p5et0y3sp5cp3sp45t3hh84t08gcf49ye8athryy36vjym5q0r65sjxen5qkeqpp57m9wees47jhe83cjvtyaln0lpfne90scfvyhk630eklrpnuvfgqqdq4g9exkgznw3hhyefqyvensxqzjccqp2rzjq2v454h7kjlfx9c6kcfeprd4d7lsn4cmhsngyuvmx9pr6lmepgu0cpzs3yqqqtqqqqqqqqqpqqqqqzsqqc9qxpqysgqsxudq7yy8nq4lmct42eq6rhq4rl76w2u89w35nas4djcdyw4dvz9qs40ta8s9nu8sypwzr6hpsdelgaurn8nw0mr69nnmke7nmma25sqnxeyj0'
+      const input = bolt11Invoices.testnet.valid
       const result = await decode(input)
 
       expect(result.valid).toBe(true)
@@ -33,8 +34,7 @@ describe('Bitcoin Decode', () => {
     })
 
     it('should decode a mainnet bolt11 invoice', async () => {
-      const input =
-        'lnbc10u1p5et0xtpp5lmuztz4yunmruy30a3xqgw4ng8m2m8vzx5af48f85t9ymu3gr0esdq823jhxaqcqzzsxqrrsssp5lc3sp7932r379kcmnat4c20cgudp4vhlzwsqjqcvw0gqw27pjv6s9qxpqysgq4a5zpt7227kz33qe4kx3wrzvm2m88nchqq5sjd4p8ezjfpdcxlwy6pw39qwhym7sxesxazyz6ezjv3l7r62musv6jsdn8aqqjw6r50qp32unnk'
+      const input = bolt11Invoices.mainnet.valid
       const result = await decode(input)
 
       expect(result.valid).toBe(true)
@@ -53,8 +53,7 @@ describe('Bitcoin Decode', () => {
 
   describe('Bolt12', () => {
     it('should decode a mainnet bolt12 offer', async () => {
-      const input =
-        'lno1pqps7sjqpgz9getnwsgwuquxfmcztl0gldv8mxy3sm8x5jscdz27u39fy6luxu8zcdn9j73l3upsh07rk5jt5kkev5xadp5d3hulrgyv0m3u4h20h2gz7tzntd45huszqgxxjs85lxz5rc0r3uwfrwgk92pp2a5rdpx9cjrjvjhqyc5x5dkyvqpnclwrc8k5z8atcvvptlwv9dty80qt7378lxt0nhpezz8m9zxzulxftqf399m279led8889uy3rssvlwgmwqpfvg8m5qksdsz8pnhhyvlcgkplzvngwftzjd32qps35mql888hd6sqx2g5k9al75w4p4apqa9gay0gwsquw2pjaqhvuvvmws7k5wan4fae3c3tnt33qh85lekwevhqvaqw5nk2hc'
+      const input = bolt12Offers.mainnet.valid
       const result = await decode(input)
 
       expect(result.valid).toBe(true)
@@ -172,8 +171,7 @@ describe('Bitcoin Decode', () => {
 
   describe('Payment request', () => {
     it('should decode a lightning: prefixed bolt11 invoice', async () => {
-      const invoice =
-        'lnbc10u1p5et0xtpp5lmuztz4yunmruy30a3xqgw4ng8m2m8vzx5af48f85t9ymu3gr0esdq823jhxaqcqzzsxqrrsssp5lc3sp7932r379kcmnat4c20cgudp4vhlzwsqjqcvw0gqw27pjv6s9qxpqysgq4a5zpt7227kz33qe4kx3wrzvm2m88nchqq5sjd4p8ezjfpdcxlwy6pw39qwhym7sxesxazyz6ezjv3l7r62musv6jsdn8aqqjw6r50qp32unnk'
+      const invoice = bolt11Invoices.mainnet.valid
       const input = `lightning:${invoice}`
       const result = await decode(input)
 
@@ -201,7 +199,7 @@ describe('Bitcoin Decode', () => {
         return
       }
       expect(result.input).toBe(input)
-      expect(result.destination.value).toBe(input)
+      expect(result.destination.value).toBe(input.toLowerCase())
       expect(result.destination.type).toBe('lnurl')
       expect(result.destination.protocol).toBe('lightning')
     })
@@ -209,8 +207,7 @@ describe('Bitcoin Decode', () => {
 
   describe('BIP-321', () => {
     it('should decode a BIP-321 URI with lightning parameter', async () => {
-      const lightning =
-        'LNTBS10U1P5ET0Y3SP5CP3SP45T3HH84T08GCF49YE8ATHRYY36VJYM5Q0R65SJXEN5QKEQPP57M9WEES47JHE83CJVTYALN0LPFNE90SCFVYHK630EKLRPNUVFGQQDQ4G9EXKGZNW3HHYEFQYVENSXQZJCCQP2RZJQ2V454H7KJLFX9C6KCFEPRD4D7LSN4CMHSNGYUVMX9PR6LMEPGU0CPZS3YQQQTQQQQQQQQQPQQQQQZSQQC9QXPQYSGQSXUDQ7YY8NQ4LMCT42EQ6RHQ4RL76W2U89W35NAS4DJCDYW4DVZ9QS40TA8S9NU8SYPWZR6HPSDELGAURN8NW0MR69NNMKE7NMMA25SQNXEYJ0'
+      const lightning = bolt11Invoices.testnet.uppercase
       const input = `bitcoin:?amount=0.00001&label=Byte%20Store&message=Kibbles%20'n%20Bits&lightning=${lightning}`
       const result = await decode(input)
 
@@ -225,6 +222,24 @@ describe('Bitcoin Decode', () => {
       expect(result.network).toBe('testnet')
       expect(result.metadata?.amount).toBe(1000)
       expect(result.metadata?.description).toBe('Ark Store #38')
+    })
+
+    it('should normalize uppercase on-chain address in BIP-321 URI', async () => {
+      const input = bip321URIs.onChainUppercase
+      const result = await decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.input).toBe(input)
+      expect(result.destination.value).toBe(
+        bitcoinAddresses.testnet.p2wpkh.valid
+      )
+      expect(result.destination.type).toBe('bitcoin-address')
+      expect(result.destination.addressType).toBe('p2wpkh')
+      expect(result.network).toBe('testnet')
+      expect(result.metadata?.amount).toBe(100_000)
     })
 
     it('should decode a BIP-321 URI with lightning address and ark', async () => {
@@ -259,8 +274,7 @@ describe('Bitcoin Decode', () => {
     })
 
     it('should let BOLT11 invoice amount win over URI amount', async () => {
-      const lightning =
-        'LNTBS10U1P5ET0Y3SP5CP3SP45T3HH84T08GCF49YE8ATHRYY36VJYM5Q0R65SJXEN5QKEQPP57M9WEES47JHE83CJVTYALN0LPFNE90SCFVYHK630EKLRPNUVFGQQDQ4G9EXKGZNW3HHYEFQYVENSXQZJCCQP2RZJQ2V454H7KJLFX9C6KCFEPRD4D7LSN4CMHSNGYUVMX9PR6LMEPGU0CPZS3YQQQTQQQQQQQQQPQQQQQZSQQC9QXPQYSGQSXUDQ7YY8NQ4LMCT42EQ6RHQ4RL76W2U89W35NAS4DJCDYW4DVZ9QS40TA8S9NU8SYPWZR6HPSDELGAURN8NW0MR69NNMKE7NMMA25SQNXEYJ0'
+      const lightning = bolt11Invoices.testnet.uppercase
       const input = `bitcoin:?amount=0.5&lightning=${lightning}`
       const result = await decode(input)
 
@@ -287,8 +301,7 @@ describe('Bitcoin Decode', () => {
     })
 
     it('should decode a BIP-321 URI with bolt12 offer parameter', async () => {
-      const offer =
-        'lno1pqps7sjqpgz9getnwsgwuquxfmcztl0gldv8mxy3sm8x5jscdz27u39fy6luxu8zcdn9j73l3upsh07rk5jt5kkev5xadp5d3hulrgyv0m3u4h20h2gz7tzntd45huszqgxxjs85lxz5rc0r3uwfrwgk92pp2a5rdpx9cjrjvjhqyc5x5dkyvqpnclwrc8k5z8atcvvptlwv9dty80qt7378lxt0nhpezz8m9zxzulxftqf399m279led8889uy3rssvlwgmwqpfvg8m5qksdsz8pnhhyvlcgkplzvngwftzjd32qps35mql888hd6sqx2g5k9al75w4p4apqa9gay0gwsquw2pjaqhvuvvmws7k5wan4fae3c3tnt33qh85lekwevhqvaqw5nk2hc'
+      const offer = bolt12Offers.mainnet.valid
       const input = `bitcoin:?lno=${offer}`
       const result = await decode(input)
 
@@ -364,6 +377,20 @@ describe('Bitcoin Decode', () => {
         expect(result.errorMessage).toBeDefined()
       })
 
+      it('should normalize uppercase witness address', async () => {
+        const input = bitcoinAddresses.mainnet.p2wsh.uppercase
+        const result = await decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.value).toBe(input.toLowerCase())
+        expect(result.destination.addressType).toBe('p2tr')
+        expect(result.network).toBe('mainnet')
+      })
+
       it('should decode a valid P2TR address', async () => {
         const input = bitcoinAddresses.mainnet.p2tr.valid
         const result = await decode(input)
@@ -377,6 +404,20 @@ describe('Bitcoin Decode', () => {
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2tr')
         expect(result.destination.protocol).toBe('on-chain')
+        expect(result.network).toBe('mainnet')
+      })
+
+      it('should normalize uppercase P2TR address', async () => {
+        const input = bitcoinAddresses.mainnet.p2tr.uppercase
+        const result = await decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.value).toBe(input.toLowerCase())
+        expect(result.destination.addressType).toBe('p2tr')
         expect(result.network).toBe('mainnet')
       })
 
@@ -469,6 +510,20 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
+      it('should normalize uppercase P2WPKH address', async () => {
+        const input = bitcoinAddresses.testnet.p2wpkh.uppercase
+        const result = await decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.value).toBe(input.toLowerCase())
+        expect(result.destination.addressType).toBe('p2wpkh')
+        expect(result.network).toBe('testnet')
+      })
+
       it('should return invalid for a P2WPKH address with bad checksum', async () => {
         const input = bitcoinAddresses.testnet.p2wpkh.invalid.checksum
         const result = await decode(input)
@@ -495,6 +550,34 @@ describe('Bitcoin Decode', () => {
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2tr')
         expect(result.destination.protocol).toBe('on-chain')
+        expect(result.network).toBe('testnet')
+      })
+
+      it('should normalize uppercase P2TR address', async () => {
+        const input = bitcoinAddresses.testnet.p2tr.uppercase
+        const result = await decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.value).toBe(input.toLowerCase())
+        expect(result.destination.addressType).toBe('p2tr')
+        expect(result.network).toBe('testnet')
+      })
+
+      it('should normalize issue #6 uppercase P2TR address', async () => {
+        const input = bitcoinAddresses.testnet.p2tr.issue6
+        const result = await decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.value).toBe(input.toLowerCase())
+        expect(result.destination.addressType).toBe('p2tr')
         expect(result.network).toBe('testnet')
       })
 
@@ -669,6 +752,20 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
+      it('should normalize uppercase P2WPKH address', async () => {
+        const input = bitcoinAddresses.regtest.p2wpkh.uppercase
+        const result = await decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.value).toBe(input.toLowerCase())
+        expect(result.destination.addressType).toBe('p2wpkh')
+        expect(result.network).toBe('testnet')
+      })
+
       it('should decode a valid P2WSH address', async () => {
         const input = bitcoinAddresses.regtest.p2wsh.valid
         const result = await decode(input)
@@ -685,6 +782,20 @@ describe('Bitcoin Decode', () => {
         expect(result.network).toBe('testnet')
       })
 
+      it('should normalize uppercase P2WSH address', async () => {
+        const input = bitcoinAddresses.regtest.p2wsh.uppercase
+        const result = await decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.value).toBe(input.toLowerCase())
+        expect(result.destination.addressType).toBe('p2wsh')
+        expect(result.network).toBe('testnet')
+      })
+
       it('should decode a valid P2TR address', async () => {
         const input = bitcoinAddresses.regtest.p2tr.valid
         const result = await decode(input)
@@ -698,6 +809,20 @@ describe('Bitcoin Decode', () => {
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2tr')
         expect(result.destination.protocol).toBe('on-chain')
+        expect(result.network).toBe('testnet')
+      })
+
+      it('should normalize uppercase P2TR address', async () => {
+        const input = bitcoinAddresses.regtest.p2tr.uppercase
+        const result = await decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.value).toBe(input.toLowerCase())
+        expect(result.destination.addressType).toBe('p2tr')
         expect(result.network).toBe('testnet')
       })
     })
@@ -770,6 +895,20 @@ describe('Bitcoin Decode', () => {
       expect(result.destination.value).toBe(input)
       expect(result.destination.type).toBe('ark-address')
       expect(result.destination.protocol).toBe('ark')
+      expect(result.network).toBe('testnet')
+    })
+
+    it('should normalize uppercase ark address', async () => {
+      const input = ArkAddresses.testnet.valid.barkUppercase
+      const result = await decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.input).toBe(input)
+      expect(result.destination.value).toBe(ArkAddresses.testnet.valid.bark)
+      expect(result.destination.type).toBe('ark-address')
       expect(result.network).toBe('testnet')
     })
 

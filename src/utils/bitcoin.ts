@@ -2,6 +2,7 @@ import { sha256 } from '@noble/hashes/sha2.js'
 import { bech32, bech32m, createBase58check } from '@scure/base'
 import type { BitcoinAddressType, ParsedDestination } from '../types'
 import { DecodeError } from '../types'
+import { normalizeDestinationValue } from './normalize'
 
 const b58c = createBase58check(sha256)
 
@@ -160,7 +161,7 @@ function bitcoin(input: string): ParsedDestination {
 
   return {
     destination: {
-      value: input,
+      value: normalizeDestinationValue(input),
       protocol: 'on-chain',
       type: 'bitcoin-address',
       addressType
