@@ -29,8 +29,12 @@ describe('Bitcoin Decode', () => {
       expect(result.destination.type).toBe('bolt11')
       expect(result.destination.protocol).toBe('lightning')
       expect(result.network).toBe('testnet')
-      expect(result.metadata?.amount).toBe(1000)
-      expect(result.metadata?.description).toBe('Ark Store #38')
+      expect(result.metadata?.amount).toBe(
+        bolt11Invoices.testnet.metadata.amount
+      )
+      expect(result.metadata?.description).toBe(
+        bolt11Invoices.testnet.metadata.description
+      )
     })
 
     it('should decode a mainnet bolt11 invoice', async () => {
@@ -46,8 +50,12 @@ describe('Bitcoin Decode', () => {
       expect(result.destination.type).toBe('bolt11')
       expect(result.destination.protocol).toBe('lightning')
       expect(result.network).toBe('mainnet')
-      expect(result.metadata?.amount).toBe(1000)
-      expect(result.metadata?.description).toBe('Test')
+      expect(result.metadata?.amount).toBe(
+        bolt11Invoices.mainnet.metadata.amount
+      )
+      expect(result.metadata?.description).toBe(
+        bolt11Invoices.mainnet.metadata.description
+      )
     })
   })
 
@@ -65,7 +73,9 @@ describe('Bitcoin Decode', () => {
       expect(result.destination.type).toBe('bolt12')
       expect(result.destination.protocol).toBe('lightning')
       expect(result.network).toBe('mainnet')
-      expect(result.metadata?.description).toBe('Test')
+      expect(result.metadata?.description).toBe(
+        bolt12Offers.mainnet.metadata.description
+      )
     })
   })
 
