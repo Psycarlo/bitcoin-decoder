@@ -24,7 +24,7 @@ describe('Bitcoin Decode', () => {
         return
       }
       expect(result.input).toBe(input)
-      expect(result.destination.destination).toBe(input)
+      expect(result.destination.value).toBe(input)
       expect(result.destination.type).toBe('bolt11')
       expect(result.destination.protocol).toBe('lightning')
       expect(result.network).toBe('testnet')
@@ -42,7 +42,7 @@ describe('Bitcoin Decode', () => {
         return
       }
       expect(result.input).toBe(input)
-      expect(result.destination.destination).toBe(input)
+      expect(result.destination.value).toBe(input)
       expect(result.destination.type).toBe('bolt11')
       expect(result.destination.protocol).toBe('lightning')
       expect(result.network).toBe('mainnet')
@@ -62,7 +62,7 @@ describe('Bitcoin Decode', () => {
         return
       }
       expect(result.input).toBe(input)
-      expect(result.destination.destination).toBe(input)
+      expect(result.destination.value).toBe(input)
       expect(result.destination.type).toBe('bolt12')
       expect(result.destination.protocol).toBe('lightning')
       expect(result.network).toBe('mainnet')
@@ -81,7 +81,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('lnaddress')
         expect(result.destination.protocol).toBe('lightning')
       })
@@ -95,7 +95,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('lnaddress')
         expect(result.destination.protocol).toBe('lightning')
       })
@@ -135,7 +135,7 @@ describe('Bitcoin Decode', () => {
       it('should resolve a valid medusa lightning address', async () => {
         const result = await wellKnown(lightningAddresses.valid.medusa)
 
-        expect(result).not.toBe(false)
+        expect(result).not.toBeNull()
         if (!result) {
           return
         }
@@ -147,7 +147,7 @@ describe('Bitcoin Decode', () => {
       it('should resolve a valid wos lightning address', async () => {
         const result = await wellKnown(lightningAddresses.valid.wos)
 
-        expect(result).not.toBe(false)
+        expect(result).not.toBeNull()
         if (!result) {
           return
         }
@@ -182,7 +182,7 @@ describe('Bitcoin Decode', () => {
         return
       }
       expect(result.input).toBe(input)
-      expect(result.destination.destination).toBe(invoice)
+      expect(result.destination.value).toBe(invoice)
       expect(result.destination.type).toBe('bolt11')
       expect(result.destination.protocol).toBe('lightning')
       expect(result.network).toBe('mainnet')
@@ -201,7 +201,7 @@ describe('Bitcoin Decode', () => {
         return
       }
       expect(result.input).toBe(input)
-      expect(result.destination.destination).toBe(input)
+      expect(result.destination.value).toBe(input)
       expect(result.destination.type).toBe('lnurl')
       expect(result.destination.protocol).toBe('lightning')
     })
@@ -219,7 +219,7 @@ describe('Bitcoin Decode', () => {
         return
       }
       expect(result.input).toBe(input)
-      expect(result.destination.destination).toBe(lightning.toLowerCase())
+      expect(result.destination.value).toBe(lightning.toLowerCase())
       expect(result.destination.type).toBe('bolt11')
       expect(result.destination.protocol).toBe('lightning')
       expect(result.network).toBe('testnet')
@@ -236,7 +236,7 @@ describe('Bitcoin Decode', () => {
         return
       }
       expect(result.input).toBe(input)
-      expect(result.destination.destination).toBe('psycarlo@medusa.bz')
+      expect(result.destination.value).toBe('psycarlo@medusa.bz')
       expect(result.destination.type).toBe('lnaddress')
       expect(result.destination.protocol).toBe('lightning')
       expect(result.destinations).toHaveLength(2)
@@ -297,7 +297,7 @@ describe('Bitcoin Decode', () => {
         return
       }
       expect(result.input).toBe(input)
-      expect(result.destination.destination).toBe(offer)
+      expect(result.destination.value).toBe(offer)
       expect(result.destination.type).toBe('bolt12')
       expect(result.destination.protocol).toBe('lightning')
       expect(result.network).toBe('mainnet')
@@ -315,7 +315,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2pkh')
         expect(result.destination.protocol).toBe('on-chain')
@@ -344,7 +344,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2sh')
         expect(result.destination.protocol).toBe('on-chain')
@@ -373,7 +373,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2tr')
         expect(result.destination.protocol).toBe('on-chain')
@@ -404,7 +404,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2pkh')
         expect(result.destination.protocol).toBe('on-chain')
@@ -433,7 +433,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2sh')
         expect(result.destination.protocol).toBe('on-chain')
@@ -462,7 +462,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2wpkh')
         expect(result.destination.protocol).toBe('on-chain')
@@ -491,7 +491,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2tr')
         expect(result.destination.protocol).toBe('on-chain')
@@ -522,7 +522,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2pkh')
         expect(result.destination.protocol).toBe('on-chain')
@@ -538,7 +538,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2pkh')
         expect(result.destination.protocol).toBe('on-chain')
@@ -567,7 +567,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2sh')
         expect(result.destination.protocol).toBe('on-chain')
@@ -583,7 +583,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2tr')
         expect(result.destination.protocol).toBe('on-chain')
@@ -614,7 +614,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2pkh')
         expect(result.destination.protocol).toBe('on-chain')
@@ -630,7 +630,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2pkh')
         expect(result.destination.protocol).toBe('on-chain')
@@ -646,7 +646,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2sh')
         expect(result.destination.protocol).toBe('on-chain')
@@ -662,7 +662,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2wpkh')
         expect(result.destination.protocol).toBe('on-chain')
@@ -678,7 +678,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2wsh')
         expect(result.destination.protocol).toBe('on-chain')
@@ -694,7 +694,7 @@ describe('Bitcoin Decode', () => {
           return
         }
         expect(result.input).toBe(input)
-        expect(result.destination.destination).toBe(input)
+        expect(result.destination.value).toBe(input)
         expect(result.destination.type).toBe('bitcoin-address')
         expect(result.destination.addressType).toBe('p2tr')
         expect(result.destination.protocol).toBe('on-chain')
@@ -752,7 +752,7 @@ describe('Bitcoin Decode', () => {
         return
       }
       expect(result.input).toBe(input)
-      expect(result.destination.destination).toBe(input)
+      expect(result.destination.value).toBe(input)
       expect(result.destination.type).toBe('ark-address')
       expect(result.destination.protocol).toBe('ark')
       expect(result.network).toBe('testnet')
@@ -767,7 +767,7 @@ describe('Bitcoin Decode', () => {
         return
       }
       expect(result.input).toBe(input)
-      expect(result.destination.destination).toBe(input)
+      expect(result.destination.value).toBe(input)
       expect(result.destination.type).toBe('ark-address')
       expect(result.destination.protocol).toBe('ark')
       expect(result.network).toBe('testnet')

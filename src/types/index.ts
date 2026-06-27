@@ -28,13 +28,15 @@ export type BitcoinAddressType = 'p2pkh' | 'p2sh' | 'p2wpkh' | 'p2wsh' | 'p2tr'
 
 export type Destination =
   | {
-      destination: string
+      /** The decoded destination string (address, invoice, offer, etc.) */
+      value: string
       type: 'bitcoin-address'
       protocol: Protocol
       addressType: BitcoinAddressType
     }
   | {
-      destination: string
+      /** The decoded destination string (address, invoice, offer, etc.) */
+      value: string
       type: Exclude<DestinationType, 'bitcoin-address'>
       protocol: Protocol
     }
@@ -418,13 +420,7 @@ export class DecodeError extends Error {
   }
 }
 
-type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
-  ? Omit<T, K>
-  : never
-
 export type ParsedDestination = {
-  destination: DistributiveOmit<Destination, 'destination'> & {
-    value: string
-  }
+  destination: Destination
   metadata?: Metadata
 }

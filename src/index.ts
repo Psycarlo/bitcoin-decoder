@@ -1,11 +1,4 @@
-import type {
-  DecodedData,
-  DecodeOptions,
-  Destination,
-  Input,
-  NostrEntity,
-  ParsedDestination
-} from './types'
+import type { DecodedData, DecodeOptions, Input, NostrEntity } from './types'
 import { DecodeError } from './types'
 import { ARK_PREFIXES, ark } from './utils/ark'
 import { bip321 } from './utils/bip-321'
@@ -29,26 +22,9 @@ const BOLT12_PREFIXES = ['lnbcrto1', 'lnto1', 'lno1']
 type SuccessData = Extract<DecodedData, { valid: true; kind: 'payment' }>
 type SuccessPayload = Omit<SuccessData, 'valid' | 'kind'>
 
-function toDestination(pd: ParsedDestination['destination']): Destination {
-  if (pd.type === 'bitcoin-address') {
-    return {
-      destination: pd.value,
-      type: pd.type,
-      protocol: pd.protocol,
-      addressType: pd.addressType
-    }
-  }
-
-  return {
-    destination: pd.value,
-    type: pd.type,
-    protocol: pd.protocol
-  }
-}
-
 function decodeBolt11(input: Input, invoice: Input): SuccessPayload {
   const parsedDestination = bolt11(invoice)
-  const destination = toDestination(parsedDestination.destination)
+  const destination = parsedDestination.destination
 
   return {
     input,
@@ -61,7 +37,7 @@ function decodeBolt11(input: Input, invoice: Input): SuccessPayload {
 
 function decodeBolt12(input: Input, offer: Input): SuccessPayload {
   const parsedDestination = bolt12(offer)
-  const destination = toDestination(parsedDestination.destination)
+  const destination = parsedDestination.destination
 
   return {
     input,
@@ -74,7 +50,7 @@ function decodeBolt12(input: Input, offer: Input): SuccessPayload {
 
 async function decodeLightningAddress(input: Input): Promise<SuccessPayload> {
   const parsedDestination = await lightningAddress(input)
-  const destination = toDestination(parsedDestination.destination)
+  const destination = parsedDestination.destination
 
   return {
     input,
@@ -86,7 +62,7 @@ async function decodeLightningAddress(input: Input): Promise<SuccessPayload> {
 
 async function decodeLnurl(input: Input): Promise<SuccessPayload> {
   const parsedDestination = await lnurl(input)
-  const destination = toDestination(parsedDestination.destination)
+  const destination = parsedDestination.destination
 
   return {
     input,
@@ -98,7 +74,7 @@ async function decodeLnurl(input: Input): Promise<SuccessPayload> {
 
 function decodeArk(input: Input): SuccessPayload {
   const parsedDestination = ark(input)
-  const destination = toDestination(parsedDestination.destination)
+  const destination = parsedDestination.destination
 
   return {
     input,
@@ -119,23 +95,21 @@ async function decodeBip321(input: Input): Promise<SuccessPayload> {
     )
   }
 
-  const destination = toDestination(first.destination)
-  const destinations = parsedDestinations.map((pd) =>
-    toDestination(pd.destination)
-  )
+  const destination = first.destination
+  const destinations = parsedDestinations.map((pd) => pd.destination)
 
   return {
     input,
     destination,
     destinations,
-    network: getNetwork(destination.destination) || 'unknown',
+    network: getNetwork(destination.value) || 'unknown',
     metadata: first.metadata
   }
 }
 
 function decodeBitcoin(input: Input): SuccessPayload {
   const parsedDestination = bitcoin(input)
-  const destination = toDestination(parsedDestination.destination)
+  const destination = parsedDestination.destination
 
   return {
     input,
