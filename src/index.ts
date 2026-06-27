@@ -216,6 +216,40 @@ async function enrichWithProfile(
   return entity
 }
 
+/**
+ * Decode any bitcoin-related string: on-chain addresses, Lightning invoices,
+ * offers, LNURL, Lightning addresses, Ark addresses, BIP-321 URIs, Nostr
+ * NIP-19 entities, extended keys, PSBTs, and transaction ids.
+ *
+ * The format is auto-detected from the input. This function never throws —
+ * failures are returned as `{ valid: false, errorCode, errorMessage }`.
+ *
+ * Network lookups are opt-in: Nostr profile fetch (`opts.nostr.fetchProfile`)
+ * and transaction lookup (`opts.transaction.fetch`). Everything else decodes
+ * fully offline.
+ *
+ * @param input - The raw string to decode.
+ * @param opts - Optional Nostr / transaction / PSBT decode options.
+ * @returns A discriminated union. Narrow on `valid` first, then `kind`.
+ *
+ * @example
+ * ```ts
+ * import { decode } from 'bitcoin-decoder'
+ *
+ * const result = await decode('bc1q...')
+ * if (!result.valid) {
+ *   console.error(result.errorCode, result.errorMessage)
+ * } else if (result.kind === 'payment') {
+ *   console.log(result.destination.value, result.network)
+ * }
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Opt in to a network lookup
+ * const tx = await decode(txid, { transaction: { fetch: true } })
+ * ```
+ */
 async function decode(
   input: Input,
   opts: DecodeOptions = {}
