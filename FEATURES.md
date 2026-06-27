@@ -13,9 +13,10 @@ What `bitcoin-decoder` can currently decode.
 
 ## Destination normalization
 
-- [x] Bech32-encoded strings return lowercase in `destination.value`
-- [x] Legacy base58 on-chain addresses preserve input casing
-- [x] Transaction ids return lowercase hex
+- [x] Bech32 strings (`destination.value`, NIP-19 `encoded`) return lowercase
+- [x] Lightning addresses (`user@domain`) return lowercase
+- [x] Legacy base58 on-chain addresses and extended keys preserve input casing
+- [x] Transaction ids and in-tx addresses return lowercase hex / normalized bech32
 
 ## Lightning
 

@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bech32-encoded destination values return lowercase in `destination.value` (on-chain, Lightning, Ark, LNURL). Legacy base58 and lightning addresses are unchanged. Transaction ids use lowercase hex via the same normalizer.
+- Bech32-encoded destination values return lowercase in `destination.value` and `encoded` (NIP-19). Lightning addresses are lowercased. Legacy base58 and extended keys preserve input casing. Transaction ids and tx hex fields use lowercase.
 - `DecodedData` union now includes `DecodedVtxo`.
 - Dependencies bumped: `@noble/hashes` to `^2.3.0`, `@scure/base` to `^2.3.0`, `bip-321` to `^0.0.11`, `nostr-tools` to `^2.24.2`.
 
