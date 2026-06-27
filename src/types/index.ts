@@ -1,7 +1,5 @@
 import type { NostrRelayUrl } from '../constants/nostr-relays'
 
-export type Input = string
-
 /** Bitcoin network
  *
  *  `testnet` here includes bitcoin testnet, signet, and regtest.
@@ -170,7 +168,7 @@ export type DecodedPayment = {
   /** Category of decoded entity. Discriminator for future kinds (nostr, transaction, psbt, key, identifier). */
   kind: 'payment'
   /** Raw text passed by the user */
-  input: Input
+  input: string
   /** All parsed destinations */
   destinations: Destination[]
   /** Shortcut primary destination for convenience. Lightning > Ark > On-chain */
@@ -184,7 +182,7 @@ export type DecodedPayment = {
 export type DecodedError = {
   valid: false
   /** Raw text passed by the user */
-  input: Input
+  input: string
   errorMessage: string
   errorCode: ErrorCode
 }
@@ -193,7 +191,7 @@ export type DecodedNostr = {
   valid: true
   kind: 'nostr'
   /** Raw text passed by the user */
-  input: Input
+  input: string
   /** Decoded NIP-19 entity */
   entity: NostrEntity
 }
@@ -279,7 +277,7 @@ export type DecodedTransaction = {
   valid: true
   kind: 'transaction'
   /** Raw text passed by the user */
-  input: Input
+  input: string
   /** Transaction id (echo of input, lowercased). */
   txid: string
   /** Full transaction data. Present only when `opts.transaction.fetch === true`. */
@@ -344,7 +342,7 @@ export type DecodedKey = {
   valid: true
   kind: 'key'
   /** Raw text passed by the user */
-  input: Input
+  input: string
   key: ExtendedKey
 }
 
@@ -399,7 +397,7 @@ export type DecodedPsbt = {
   valid: true
   kind: 'psbt'
   /** Raw text passed by the user */
-  input: Input
+  input: string
   data: PsbtData
 }
 

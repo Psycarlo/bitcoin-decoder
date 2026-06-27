@@ -1,4 +1,4 @@
-import type { DecodedData, DecodeOptions, Input, NostrEntity } from './types'
+import type { DecodedData, DecodeOptions, NostrEntity } from './types'
 import { DecodeError } from './types'
 import { ARK_PREFIXES, ark } from './utils/ark'
 import { bip321 } from './utils/bip-321'
@@ -22,7 +22,7 @@ const BOLT12_PREFIXES = ['lnbcrto1', 'lnto1', 'lno1']
 type SuccessData = Extract<DecodedData, { valid: true; kind: 'payment' }>
 type SuccessPayload = Omit<SuccessData, 'valid' | 'kind'>
 
-function decodeBolt11(input: Input, invoice: Input): SuccessPayload {
+function decodeBolt11(input: string, invoice: string): SuccessPayload {
   const parsedDestination = bolt11(invoice)
   const destination = parsedDestination.destination
 
@@ -35,7 +35,7 @@ function decodeBolt11(input: Input, invoice: Input): SuccessPayload {
   }
 }
 
-function decodeBolt12(input: Input, offer: Input): SuccessPayload {
+function decodeBolt12(input: string, offer: string): SuccessPayload {
   const parsedDestination = bolt12(offer)
   const destination = parsedDestination.destination
 
@@ -48,7 +48,7 @@ function decodeBolt12(input: Input, offer: Input): SuccessPayload {
   }
 }
 
-async function decodeLightningAddress(input: Input): Promise<SuccessPayload> {
+async function decodeLightningAddress(input: string): Promise<SuccessPayload> {
   const parsedDestination = await lightningAddress(input)
   const destination = parsedDestination.destination
 
@@ -60,7 +60,7 @@ async function decodeLightningAddress(input: Input): Promise<SuccessPayload> {
   }
 }
 
-async function decodeLnurl(input: Input): Promise<SuccessPayload> {
+async function decodeLnurl(input: string): Promise<SuccessPayload> {
   const parsedDestination = await lnurl(input)
   const destination = parsedDestination.destination
 
@@ -72,7 +72,7 @@ async function decodeLnurl(input: Input): Promise<SuccessPayload> {
   }
 }
 
-function decodeArk(input: Input): SuccessPayload {
+function decodeArk(input: string): SuccessPayload {
   const parsedDestination = ark(input)
   const destination = parsedDestination.destination
 
@@ -84,7 +84,7 @@ function decodeArk(input: Input): SuccessPayload {
   }
 }
 
-async function decodeBip321(input: Input): Promise<SuccessPayload> {
+async function decodeBip321(input: string): Promise<SuccessPayload> {
   const parsedDestinations = await bip321(input)
 
   const first = parsedDestinations[0]
@@ -107,7 +107,7 @@ async function decodeBip321(input: Input): Promise<SuccessPayload> {
   }
 }
 
-function decodeBitcoin(input: Input): SuccessPayload {
+function decodeBitcoin(input: string): SuccessPayload {
   const parsedDestination = bitcoin(input)
   const destination = parsedDestination.destination
 
@@ -119,7 +119,7 @@ function decodeBitcoin(input: Input): SuccessPayload {
   }
 }
 
-async function decodeInput(input: Input): Promise<SuccessPayload> {
+async function decodeInput(input: string): Promise<SuccessPayload> {
   const lowerInput = input.toLowerCase()
 
   if (lowerInput.startsWith(BIP321_PREFIX)) {
@@ -251,7 +251,7 @@ async function enrichWithProfile(
  * ```
  */
 async function decode(
-  input: Input,
+  input: string,
   opts: DecodeOptions = {}
 ): Promise<DecodedData> {
   try {
@@ -319,4 +319,3 @@ export type {
   WellKnown
 } from './types'
 export { wellKnown } from './utils/lightning-address'
-export default { decode }

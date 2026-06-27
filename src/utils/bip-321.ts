@@ -3,7 +3,7 @@ import {
   type PaymentMethod,
   parseBIP321
 } from 'bip-321'
-import type { Input, Metadata, ParsedDestination } from '../types'
+import type { Metadata, ParsedDestination } from '../types'
 import { ark } from './ark'
 import { bitcoin } from './bitcoin'
 import { bolt11 } from './bolt11'
@@ -102,7 +102,7 @@ async function parse(result: BIP321ParseResult): Promise<ParsedDestination[]> {
   )
 }
 
-async function bip321(input: Input): Promise<ParsedDestination[]> {
+async function bip321(input: string): Promise<ParsedDestination[]> {
   const result = parseBIP321(input)
 
   // parse() already drops invalid/unsupported rails, so a single bad rail must

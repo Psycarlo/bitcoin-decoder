@@ -1,6 +1,6 @@
 import { sha256 } from '@noble/hashes/sha2.js'
 import { bech32, bech32m, createBase58check } from '@scure/base'
-import type { BitcoinAddressType, Input, ParsedDestination } from '../types'
+import type { BitcoinAddressType, ParsedDestination } from '../types'
 import { DecodeError } from '../types'
 
 const b58c = createBase58check(sha256)
@@ -30,7 +30,7 @@ function getAddressType(version: number): BitcoinAddressType {
   throw new DecodeError(`Unknown version byte: ${version}`, 'INVALID_VERSION')
 }
 
-function validateLegacy(input: Input): BitcoinAddressType {
+function validateLegacy(input: string): BitcoinAddressType {
   let decoded: Uint8Array
 
   try {
@@ -66,7 +66,7 @@ function getSegwitAddressType(
   return 'p2tr'
 }
 
-function validateSegwit(input: Input): BitcoinAddressType {
+function validateSegwit(input: string): BitcoinAddressType {
   const lowerInput = input.toLowerCase()
 
   // Try bech32 (witness version 0)
@@ -145,7 +145,7 @@ function validateSegwit(input: Input): BitcoinAddressType {
   }
 }
 
-function validate(input: Input): BitcoinAddressType {
+function validate(input: string): BitcoinAddressType {
   const lowerInput = input.toLowerCase()
 
   if (SEGWIT_HRPS.some((hrp) => lowerInput.startsWith(`${hrp}1`))) {
@@ -155,7 +155,7 @@ function validate(input: Input): BitcoinAddressType {
   return validateLegacy(input)
 }
 
-function bitcoin(input: Input): ParsedDestination {
+function bitcoin(input: string): ParsedDestination {
   const addressType = validate(input)
 
   return {

@@ -1,6 +1,5 @@
 import { base64, hex } from '@scure/base'
 import type {
-  Input,
   PsbtData,
   PsbtDecodeOptions,
   PsbtInput,
@@ -22,7 +21,7 @@ const PSBT_GLOBAL_INPUT_COUNT = 0x04
 const PSBT_GLOBAL_OUTPUT_COUNT = 0x05
 const PSBT_GLOBAL_VERSION = 0xfb
 
-// Input key types
+// string key types
 const PSBT_IN_NON_WITNESS_UTXO = 0x00
 const PSBT_IN_WITNESS_UTXO = 0x01
 const PSBT_IN_PARTIAL_SIG = 0x02
@@ -129,7 +128,7 @@ function readUint32LE(bytes: Uint8Array): number {
   ).getUint32(0, true)
 }
 
-function toBytes(input: Input): Uint8Array {
+function toBytes(input: string): Uint8Array {
   const trimmed = input.trim()
   try {
     if (trimmed.toLowerCase().startsWith(PSBT_MAGIC_HEX)) {
@@ -371,7 +370,7 @@ function assemble(
   }
 }
 
-function isPsbt(input: Input): boolean {
+function isPsbt(input: string): boolean {
   const trimmed = input.trim()
   return (
     trimmed.toLowerCase().startsWith(PSBT_MAGIC_HEX) ||
@@ -379,7 +378,7 @@ function isPsbt(input: Input): boolean {
   )
 }
 
-function psbt(input: Input, opts: PsbtDecodeOptions = {}): PsbtData {
+function psbt(input: string, opts: PsbtDecodeOptions = {}): PsbtData {
   const network = opts.network ?? 'mainnet'
   const reader = new Reader(toBytes(input))
   checkMagic(reader)

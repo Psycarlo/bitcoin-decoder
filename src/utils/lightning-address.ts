@@ -1,9 +1,4 @@
-import type {
-  Input,
-  ParsedDestination,
-  ParsedLNAddress,
-  WellKnown
-} from '../types'
+import type { ParsedDestination, ParsedLNAddress, WellKnown } from '../types'
 import { DecodeError } from '../types'
 
 const BASE_URL = 'https://'
@@ -11,7 +6,7 @@ const FETCH_TIMEOUT_MS = 5000
 
 const headers = { 'Content-Type': 'application/json' }
 
-function parse(input: Input): ParsedLNAddress {
+function parse(input: string): ParsedLNAddress {
   const atIndex = input.indexOf('@')
 
   if (atIndex < 1) {
@@ -34,7 +29,7 @@ function parse(input: Input): ParsedLNAddress {
   return { username, domain }
 }
 
-async function lightningAddress(input: Input): Promise<ParsedDestination> {
+async function lightningAddress(input: string): Promise<ParsedDestination> {
   const parsed = parse(input)
   const result = await wellKnown(
     `${BASE_URL}${parsed.domain}/.well-known/lnurlp/${parsed.username}`,
@@ -60,7 +55,7 @@ async function lightningAddress(input: Input): Promise<ParsedDestination> {
 async function wellKnown(
   lnaddress: string,
   needsParse = true
-): Promise<WellKnown | false> {
+): Promise<WellKnown | null> {
   let url = lnaddress
 
   if (needsParse) {
@@ -68,7 +63,7 @@ async function wellKnown(
       const parsed = parse(lnaddress)
       url = `${BASE_URL}${parsed.domain}/.well-known/lnurlp/${parsed.username}`
     } catch {
-      return false
+      return null
     }
   }
 
@@ -84,15 +79,15 @@ async function wellKnown(
       json
 
     if (!callback) {
-      return false
+      return null
     }
 
     if (!minSendable) {
-      return false
+      return null
     }
 
     if (!maxSendable) {
-      return false
+      return null
     }
 
     return {
@@ -103,7 +98,7 @@ async function wellKnown(
       metadata
     } as WellKnown
   } catch {
-    return false
+    return null
   }
 }
 

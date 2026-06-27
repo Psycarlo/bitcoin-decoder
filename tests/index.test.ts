@@ -156,16 +156,16 @@ describe('Bitcoin Decode', () => {
         expect(result.maxSendable).toBeDefined()
       })
 
-      it('should return false for an invalid medusa lightning address', async () => {
+      it('should return null for an invalid medusa lightning address', async () => {
         const result = await wellKnown(lightningAddresses.invalid.medusa)
 
-        expect(result).toBe(false)
+        expect(result).toBeNull()
       })
 
-      it('should return false for an invalid wos lightning address', async () => {
+      it('should return null for an invalid wos lightning address', async () => {
         const result = await wellKnown(lightningAddresses.invalid.wos)
 
-        expect(result).toBe(false)
+        expect(result).toBeNull()
       })
     })
   })

@@ -1,12 +1,12 @@
 import { bech32m } from '@scure/base'
-import type { Input, ParsedDestination } from '../types'
+import type { ParsedDestination } from '../types'
 import { DecodeError } from '../types'
 
 const ARK_PREFIXES = ['ark', 'tark']
 const VALID_VERSIONS = [0, 1]
 const MIN_PAYLOAD_LENGTH = 4
 
-function validate(input: Input): void {
+function validate(input: string): void {
   let prefix: string
   let words: number[]
 
@@ -41,7 +41,7 @@ function validate(input: Input): void {
   }
 }
 
-function ark(input: Input): ParsedDestination {
+function ark(input: string): ParsedDestination {
   validate(input)
 
   return {

@@ -1,5 +1,5 @@
 import { bech32, hex, utf8 } from '@scure/base'
-import type { Input, ParsedDestination } from '../types'
+import type { ParsedDestination } from '../types'
 
 const BECH32_ALPHABET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
 
@@ -194,7 +194,7 @@ function parse(decodedOffer: DecodedOffer): ParsedDestination {
   }
 }
 
-function bolt12(input: Input) {
+function bolt12(input: string) {
   return parse(decode(input))
 }
 

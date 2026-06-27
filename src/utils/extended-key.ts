@@ -5,7 +5,6 @@ import type {
   ExtendedKey,
   ExtendedKeyScriptType,
   ExtendedKeyType,
-  Input,
   Network
 } from '../types'
 import { DecodeError } from '../types'
@@ -152,7 +151,7 @@ const EXTENDED_KEY_PREFIXES = [
   ...new Set(Object.values(VERSIONS).map((v) => v.type))
 ]
 
-function isExtendedKey(input: Input): boolean {
+function isExtendedKey(input: string): boolean {
   return EXTENDED_KEY_PREFIXES.some((prefix) => input.startsWith(prefix))
 }
 
@@ -160,7 +159,7 @@ function hash160(data: Uint8Array): Uint8Array {
   return ripemd160(sha256(data))
 }
 
-function extendedKey(input: Input): ExtendedKey {
+function extendedKey(input: string): ExtendedKey {
   let payload: Uint8Array
   try {
     payload = b58c.decode(input)

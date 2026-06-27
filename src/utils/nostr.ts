@@ -1,6 +1,6 @@
 import { hex } from '@scure/base'
 import { decode as nip19Decode } from 'nostr-tools/nip19'
-import type { Input, NostrEntity } from '../types'
+import type { NostrEntity } from '../types'
 import { DecodeError } from '../types'
 
 const NOSTR_PREFIXES = [
@@ -12,7 +12,7 @@ const NOSTR_PREFIXES = [
   'naddr'
 ] as const
 
-function nostr(input: Input): NostrEntity {
+function nostr(input: string): NostrEntity {
   let decoded: ReturnType<typeof nip19Decode>
   try {
     decoded = nip19Decode(input)

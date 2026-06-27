@@ -1,5 +1,5 @@
 import { type DecodedInvoice, decode, type Section } from 'light-bolt11-decoder'
-import type { Input, ParsedDestination } from '../types'
+import type { ParsedDestination } from '../types'
 
 function getSection<T extends Section['name']>(
   decodedInvoice: DecodedInvoice,
@@ -27,7 +27,7 @@ function parse(decodedInvoice: DecodedInvoice): ParsedDestination {
   }
 }
 
-function bolt11(input: Input) {
+function bolt11(input: string) {
   return parse(decode(input))
 }
 

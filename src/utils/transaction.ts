@@ -1,7 +1,6 @@
 import { MEMPOOL_ENDPOINTS } from '../constants/mempool-endpoints'
 import type {
   BitcoinAddressType,
-  Input,
   ScriptPubKeyType,
   TransactionData,
   TransactionDecodeOptions,
@@ -85,7 +84,7 @@ type MempoolBlock = {
   }
 }
 
-function isTxId(input: Input): boolean {
+function isTxId(input: string): boolean {
   return TXID_REGEX.test(input)
 }
 

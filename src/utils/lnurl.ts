@@ -1,11 +1,11 @@
 import { bech32 } from '@scure/base'
-import type { Input, ParsedDestination } from '../types'
+import type { ParsedDestination } from '../types'
 import { DecodeError } from '../types'
 
 const LNURL_PREFIX = 'lnurl'
 const FETCH_TIMEOUT_MS = 5000
 
-async function lnurl(input: Input): Promise<ParsedDestination> {
+async function lnurl(input: string): Promise<ParsedDestination> {
   let words: number[]
 
   try {

@@ -1,4 +1,4 @@
-import type { Input, Network } from '../types'
+import type { Network } from '../types'
 
 const MAINNET_ADDRESS_PREFIXES = ['bc1p', 'bc1q', 'bc1', '1', '3']
 const TESTNET_ADDRESS_PREFIXES = [
@@ -24,7 +24,7 @@ function startsWithAny(input: string, prefixes: string[]): boolean {
   return prefixes.some((prefix) => input.startsWith(prefix))
 }
 
-function getNetwork(input: Input): Network | undefined {
+function getNetwork(input: string): Network | undefined {
   const lowerInput = input.toLowerCase()
 
   if (startsWithAny(lowerInput, TESTNET_ADDRESS_PREFIXES)) {
