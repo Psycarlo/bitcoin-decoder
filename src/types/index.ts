@@ -56,6 +56,8 @@ export type ErrorCode =
   | 'TX_NOT_FOUND'
   | 'TX_FETCH_ERROR'
   | 'TX_TIMEOUT'
+  | 'INVALID_EXTENDED_KEY'
+  | 'INVALID_PSBT'
 
 export type NostrProfile = {
   name?: string
@@ -145,6 +147,7 @@ export type TransactionDecodeOptions = {
 export type DecodeOptions = {
   nostr?: NostrDecodeOptions
   transaction?: TransactionDecodeOptions
+  psbt?: PsbtDecodeOptions
 }
 
 export type ParsedLNAddress = {
@@ -281,10 +284,129 @@ export type DecodedTransaction = {
   data?: TransactionData
 }
 
+/** SLIP-132 / BIP-32 extended key serialization prefixes. */
+export type ExtendedKeyType =
+  | 'xpub'
+  | 'xprv'
+  | 'ypub'
+  | 'yprv'
+  | 'zpub'
+  | 'zprv'
+  | 'Ypub'
+  | 'Yprv'
+  | 'Zpub'
+  | 'Zprv'
+  | 'tpub'
+  | 'tprv'
+  | 'upub'
+  | 'uprv'
+  | 'vpub'
+  | 'vprv'
+  | 'Upub'
+  | 'Uprv'
+  | 'Vpub'
+  | 'Vprv'
+
+/** Script type implied by the SLIP-132 prefix (single-sig vs. multisig). */
+export type ExtendedKeyScriptType =
+  | 'p2pkh'
+  | 'p2wpkh-p2sh'
+  | 'p2wpkh'
+  | 'p2wsh-p2sh'
+  | 'p2wsh'
+
+export type ExtendedKey = {
+  type: ExtendedKeyType
+  /** True for `*prv` keys, false for `*pub` keys. */
+  isPrivate: boolean
+  network: Network
+  scriptType: ExtendedKeyScriptType
+  /** Derivation depth (0 for a master key). */
+  depth: number
+  /** Parent key fingerprint, 8 hex chars (`00000000` for a master key). */
+  parentFingerprint: string
+  /** Raw child number including the hardened bit. */
+  childNumber: number
+  /** Child index with the hardened bit masked off. */
+  index: number
+  hardened: boolean
+  /** Chain code, 64 hex chars. */
+  chainCode: string
+  /** 33-byte key payload as hex (compressed pubkey, or `00` + 32-byte privkey). */
+  key: string
+  /** Key fingerprint `hash160(pubkey)[:4]`. Present only for public keys. */
+  fingerprint?: string
+}
+
+export type DecodedKey = {
+  valid: true
+  kind: 'key'
+  /** Raw text passed by the user */
+  input: Input
+  key: ExtendedKey
+}
+
+export type PsbtDecodeOptions = {
+  /** Network used to encode output/input addresses. Default 'mainnet'. */
+  network?: TransactionNetwork
+}
+
+export type PsbtInput = {
+  /** Outpoint being spent. */
+  txid: string
+  vout: number
+  /** Value of the spent output in sats, when a (non-)witness UTXO is present. */
+  value?: number
+  address?: string
+  addressType?: BitcoinAddressType
+  scriptPubKeyType?: ScriptPubKeyType
+  /** Number of partial signatures attached to this input. */
+  partialSigs: number
+  sighashType?: number
+  witnessUtxo: boolean
+  nonWitnessUtxo: boolean
+}
+
+export type PsbtOutput = {
+  /** Amount in sats */
+  value: number
+  address?: string
+  addressType?: BitcoinAddressType
+  scriptPubKeyType: ScriptPubKeyType
+}
+
+export type PsbtData = {
+  /** PSBT version: 0 (BIP-174) or 2 (BIP-370). */
+  version: number
+  /** Underlying transaction version. */
+  txVersion: number
+  locktime: number
+  inputCount: number
+  outputCount: number
+  inputs: PsbtInput[]
+  outputs: PsbtOutput[]
+  /** Sum of output values in sats. */
+  totalOutput: number
+  /** Sum of known input values in sats. Present only when every input exposes its UTXO. */
+  totalInput?: number
+  /** Fee in sats (`totalInput - totalOutput`). Present only when `totalInput` is known. */
+  fee?: number
+}
+
+export type DecodedPsbt = {
+  valid: true
+  kind: 'psbt'
+  /** Raw text passed by the user */
+  input: Input
+  data: PsbtData
+}
+
 export type DecodedData =
   | DecodedPayment
   | DecodedNostr
   | DecodedTransaction
+  | DecodedKey
+  | DecodedPsbt
   | DecodedError
 
 export class DecodeError extends Error {

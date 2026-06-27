@@ -22,6 +22,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "bun test tests/index.test.ts",
+    "test:coverage": "bun test --coverage",
     "test:live": "bun test tests/live.test.ts",
     "type-check": "tsc --noEmit",
     "check": "ultracite check",
@@ -53,6 +54,11 @@
     "nip-01",
     "bip-21",
     "bip-321",
+    "bip-32",
+    "slip-132",
+    "xpub",
+    "psbt",
+    "bip-174",
     "uri"
   ],
   "license": "MIT",

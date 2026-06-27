@@ -67,6 +67,32 @@ Note: `Network` type collapses signet and regtest into `testnet`.
 - [x] Optional miner pool name via mempool.space `/v1/block` extras (`fetchMiner: true`)
 - [x] Errors: `INVALID_TXID`, `TX_NOT_FOUND`, `TX_FETCH_ERROR`, `TX_TIMEOUT`
 
+## Extended keys (BIP-32 / SLIP-132)
+
+- [x] `xpub` / `xprv` (BIP-44, P2PKH) — mainnet
+- [x] `ypub` / `yprv` (BIP-49, P2WPKH-in-P2SH) — mainnet
+- [x] `zpub` / `zprv` (BIP-84, P2WPKH) — mainnet
+- [x] `Ypub` / `Yprv` (multisig P2WSH-in-P2SH) — mainnet
+- [x] `Zpub` / `Zprv` (multisig P2WSH) — mainnet
+- [x] `tpub`/`tprv`, `upub`/`uprv`, `vpub`/`vprv`, `Upub`/`Uprv`, `Vpub`/`Vprv` — testnet
+- [x] Fields: type, isPrivate, network, scriptType, depth, parentFingerprint, childNumber, index, hardened, chainCode, key
+- [x] Key fingerprint `hash160(pubkey)[:4]` for public keys
+- [x] Offline — base58check validation, no network calls
+- [x] `kind: 'key'` result; error `INVALID_EXTENDED_KEY`
+
+## PSBT (BIP-174 / BIP-370)
+
+- [x] base64 and hex serialization
+- [x] PSBT v0 (BIP-174) via the global unsigned transaction
+- [x] PSBT v2 (BIP-370) via global input/output counts + per-record fields
+- [x] Inputs: outpoint (txid/vout), partial signature count, sighash type, witness/non-witness UTXO flags
+- [x] Input value + address derived from witness UTXO or non-witness UTXO
+- [x] Outputs: value (sats), address, addressType, scriptPubKeyType
+- [x] Totals: totalOutput; totalInput and fee when every input exposes its UTXO
+- [x] Configurable address network via `decode(psbt, { psbt: { network } })` (default mainnet)
+- [x] Offline — no network calls
+- [x] `kind: 'psbt'` result; error `INVALID_PSBT`
+
 ## Metadata
 
 - [x] Amount in sats (BOLT11, BIP-321)

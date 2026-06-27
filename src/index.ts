@@ -12,11 +12,13 @@ import { bip321 } from './utils/bip-321'
 import { BITCOIN_ADDRESS_PREFIXES, bitcoin } from './utils/bitcoin'
 import { bolt11 } from './utils/bolt11'
 import { bolt12 } from './utils/bolt12'
+import { extendedKey, isExtendedKey } from './utils/extended-key'
 import { lightningAddress } from './utils/lightning-address'
 import { LNURL_PREFIX, lnurl } from './utils/lnurl'
 import { getNetwork } from './utils/network'
 import { NOSTR_PREFIXES, nostr } from './utils/nostr'
 import { fetchProfile } from './utils/nostr-profile'
+import { isPsbt, psbt } from './utils/psbt'
 import { fetchTransactionData, isTxId } from './utils/transaction'
 
 const BIP321_PREFIX = 'bitcoin:'
@@ -250,6 +252,12 @@ async function decode(
       const entity = await enrichWithProfile(nostr(input), opts)
       return { valid: true, kind: 'nostr', input, entity }
     }
+    if (isExtendedKey(input)) {
+      return { valid: true, kind: 'key', input, key: extendedKey(input) }
+    }
+    if (isPsbt(input)) {
+      return { valid: true, kind: 'psbt', input, data: psbt(input, opts.psbt) }
+    }
     if (isTxId(input)) {
       const txid = input.toLowerCase()
       if (!opts.transaction?.fetch) {
@@ -270,11 +278,16 @@ export type { NostrRelayUrl } from './constants/nostr-relays'
 export { DEFAULT_NOSTR_RELAYS, NOSTR_RELAYS } from './constants/nostr-relays'
 export type {
   DecodedData,
+  DecodedKey,
   DecodedNostr,
   DecodedPayment,
+  DecodedPsbt,
   DecodedTransaction,
   DecodeOptions,
   Destination,
+  ExtendedKey,
+  ExtendedKeyScriptType,
+  ExtendedKeyType,
   Metadata,
   Network,
   NostrDecodeOptions,
@@ -282,6 +295,10 @@ export type {
   NostrProfile,
   ParsedLNAddress,
   ProfileFetchResult,
+  PsbtData,
+  PsbtDecodeOptions,
+  PsbtInput,
+  PsbtOutput,
   ScriptPubKeyType,
   TransactionData,
   TransactionDecodeOptions,

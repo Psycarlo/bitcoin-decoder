@@ -5,10 +5,12 @@ import { decode, wellKnown } from '../src'
 import { ArkAddresses } from './fixtures/ark'
 import { bip321URIs } from './fixtures/bip-321'
 import { bitcoinAddresses } from './fixtures/bitcoin'
+import { extendedKeys } from './fixtures/extended-key'
 import { lightningAddresses } from './fixtures/lightning-address'
 import { lnurls } from './fixtures/lnurl'
 import { nostrEntities } from './fixtures/nostr'
 import { nostrProfileFixtures } from './fixtures/nostr-profile'
+import { psbts } from './fixtures/psbt'
 
 describe('Bitcoin Decode', () => {
   describe('Bolt11', () => {
@@ -1349,6 +1351,149 @@ describe('Bitcoin Decode', () => {
         return
       }
       expect(result.errorCode).toBe('TX_TIMEOUT')
+    })
+  })
+
+  describe('Extended keys', () => {
+    const cases = [
+      extendedKeys.zpub,
+      extendedKeys.xpub,
+      extendedKeys.xprv,
+      extendedKeys.ypub,
+      extendedKeys.zprv,
+      extendedKeys.Zpub,
+      extendedKeys.tpub,
+      extendedKeys.vpub,
+      extendedKeys.Uprv
+    ]
+
+    for (const fixture of cases) {
+      it(`should decode ${fixture.type}`, async () => {
+        const result = await decode(fixture.valid)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid || result.kind !== 'key') {
+          return
+        }
+        expect(result.input).toBe(fixture.valid)
+        expect(result.key.type).toBe(fixture.type)
+        expect(result.key.scriptType).toBe(fixture.scriptType)
+        expect(result.key.network).toBe(fixture.network)
+        expect(result.key.isPrivate).toBe(fixture.isPrivate)
+      })
+    }
+
+    it('should expose full BIP-32 fields for a public key', async () => {
+      const fixture = extendedKeys.zpub
+      const result = await decode(fixture.valid)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'key') {
+        return
+      }
+      expect(result.key.depth).toBe(fixture.depth)
+      expect(result.key.parentFingerprint).toBe(fixture.parentFingerprint)
+      expect(result.key.childNumber).toBe(fixture.childNumber)
+      expect(result.key.index).toBe(0)
+      expect(result.key.hardened).toBe(false)
+      expect(result.key.chainCode).toBe(fixture.chainCode)
+      expect(result.key.key).toBe(fixture.key)
+      expect(result.key.fingerprint).toBe(fixture.fingerprint)
+    })
+
+    it('should not expose a fingerprint for private keys', async () => {
+      const result = await decode(extendedKeys.xprv.valid)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'key') {
+        return
+      }
+      expect(result.key.fingerprint).toBeUndefined()
+    })
+
+    it('should reject an extended key with a bad checksum', async () => {
+      const result = await decode(extendedKeys.invalidChecksum)
+
+      expect(result.valid).toBe(false)
+      if (result.valid) {
+        return
+      }
+      expect(result.errorCode).toBe('INVALID_EXTENDED_KEY')
+    })
+  })
+
+  describe('PSBT', () => {
+    it('should decode a BIP-174 creator PSBT (base64)', async () => {
+      const fixture = psbts.creator
+      const result = await decode(fixture.valid)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'psbt') {
+        return
+      }
+      expect(result.data.version).toBe(fixture.version)
+      expect(result.data.txVersion).toBe(fixture.txVersion)
+      expect(result.data.locktime).toBe(fixture.locktime)
+      expect(result.data.inputCount).toBe(fixture.inputCount)
+      expect(result.data.outputCount).toBe(fixture.outputCount)
+      expect(result.data.totalOutput).toBe(fixture.totalOutput)
+      expect(result.data.outputs[0].address).toBe(fixture.outputs[0].address)
+      expect(result.data.outputs[0].value).toBe(fixture.outputs[0].value)
+      expect(result.data.outputs[1].address).toBe(fixture.outputs[1].address)
+      // No UTXO data, so the input value and fee are unknown.
+      expect(result.data.totalInput).toBeUndefined()
+      expect(result.data.fee).toBeUndefined()
+    })
+
+    it('should decode the same PSBT supplied as hex', async () => {
+      const { hex } = await import('@scure/base')
+      const { base64 } = await import('@scure/base')
+      const hexInput = hex.encode(base64.decode(psbts.creator.valid))
+      const result = await decode(hexInput)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'psbt') {
+        return
+      }
+      expect(result.data.outputCount).toBe(2)
+    })
+
+    it('should derive input value and fee from a witness UTXO', async () => {
+      const fixture = psbts.withWitnessUtxo
+      const result = await decode(fixture.valid)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'psbt') {
+        return
+      }
+      expect(result.data.inputs[0].witnessUtxo).toBe(true)
+      expect(result.data.inputs[0].value).toBe(fixture.inputValue)
+      expect(result.data.totalInput).toBe(fixture.totalInput)
+      expect(result.data.totalOutput).toBe(fixture.totalOutput)
+      expect(result.data.fee).toBe(fixture.fee)
+    })
+
+    it('should encode output addresses for the requested network', async () => {
+      const result = await decode(psbts.creator.valid, {
+        psbt: { network: 'testnet' }
+      })
+
+      expect(result.valid).toBe(true)
+      if (!result.valid || result.kind !== 'psbt') {
+        return
+      }
+      const first = result.data.outputs[0].address ?? ''
+      expect(first.startsWith('m') || first.startsWith('n')).toBe(true)
+    })
+
+    it('should reject a malformed PSBT', async () => {
+      const result = await decode(psbts.invalid)
+
+      expect(result.valid).toBe(false)
+      if (result.valid) {
+        return
+      }
+      expect(result.errorCode).toBe('INVALID_PSBT')
     })
   })
 })
