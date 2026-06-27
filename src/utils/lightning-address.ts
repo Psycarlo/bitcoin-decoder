@@ -26,11 +26,15 @@ function parse(input: string): ParsedLNAddress {
     )
   }
 
-  return { username, domain }
+  return {
+    username: username.toLowerCase(),
+    domain: domain.toLowerCase()
+  }
 }
 
 async function lightningAddress(input: string): Promise<ParsedDestination> {
   const parsed = parse(input)
+  const value = `${parsed.username}@${parsed.domain}`
   const result = await wellKnown(
     `${BASE_URL}${parsed.domain}/.well-known/lnurlp/${parsed.username}`,
     false
@@ -45,7 +49,7 @@ async function lightningAddress(input: string): Promise<ParsedDestination> {
 
   return {
     destination: {
-      value: input,
+      value,
       protocol: 'lightning',
       type: 'lnaddress'
     }

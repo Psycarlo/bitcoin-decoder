@@ -9,7 +9,7 @@ import { extendedKey, isExtendedKey } from './utils/extended-key'
 import { lightningAddress } from './utils/lightning-address'
 import { LNURL_PREFIX, lnurl } from './utils/lnurl'
 import { getNetwork } from './utils/network'
-import { normalizeHex } from './utils/normalize'
+import { normalizeDestinationValue, normalizeHex } from './utils/normalize'
 import { NOSTR_PREFIXES, nostr } from './utils/nostr'
 import { fetchProfile } from './utils/nostr-profile'
 import { isPsbt, psbt } from './utils/psbt'
@@ -259,7 +259,13 @@ async function decode(
     const lowerInput = input.toLowerCase()
     if (isNostrInput(lowerInput)) {
       const entity = await enrichWithProfile(nostr(input), opts)
-      return { valid: true, kind: 'nostr', input, entity }
+      return {
+        valid: true,
+        kind: 'nostr',
+        input,
+        encoded: normalizeDestinationValue(input),
+        entity
+      }
     }
     if (isExtendedKey(input)) {
       return { valid: true, kind: 'key', input, key: extendedKey(input) }

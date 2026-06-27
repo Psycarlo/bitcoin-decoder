@@ -109,6 +109,18 @@ describe('Bitcoin Decode', () => {
         expect(result.destination.protocol).toBe('lightning')
       })
 
+      it('should normalize uppercase lightning address', async () => {
+        const input = 'Psycarlo@Medusa.BZ'
+        const result = await decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid) {
+          return
+        }
+        expect(result.input).toBe(input)
+        expect(result.destination.value).toBe('psycarlo@medusa.bz')
+      })
+
       it('should return invalid for a non-existent lightning address', async () => {
         const result = await decode(lightningAddresses.invalid.notfound)
 
@@ -960,7 +972,22 @@ describe('Bitcoin Decode', () => {
       }
       expect(result.kind).toBe('nostr')
       expect(result.input).toBe(input)
+      expect(result.encoded).toBe(input)
       expect(result.entity.type).toBe('npub')
+      expect(result.entity.data.hex).toBe(nostrEntities.npub.pubkeyHex)
+    })
+
+    it('should normalize uppercase npub', async () => {
+      const input =
+        'NPUB1XTSCYA34G58TK0Z605FVR788K263GSU6CY9X0MHNM87ECHRGUFZSEVKK5S'
+      const result = await decode(input)
+
+      expect(result.valid).toBe(true)
+      if (!result.valid) {
+        return
+      }
+      expect(result.input).toBe(input)
+      expect(result.encoded).toBe(nostrEntities.npub.valid)
       expect(result.entity.data.hex).toBe(nostrEntities.npub.pubkeyHex)
     })
 
