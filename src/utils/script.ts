@@ -5,6 +5,7 @@ import type {
   ScriptPubKeyType,
   TransactionNetwork
 } from '../types'
+import { normalizeDestinationValue } from './normalize'
 
 const b58c = createBase58check(sha256)
 
@@ -150,6 +151,20 @@ function decodeWitness(
 }
 
 export function decodeScriptPubKey(
+  script: Uint8Array,
+  network: TransactionNetwork = 'mainnet'
+): DecodedScript {
+  const decoded = decodeScriptPubKeyInner(script, network)
+  if (decoded.address) {
+    return {
+      ...decoded,
+      address: normalizeDestinationValue(decoded.address)
+    }
+  }
+  return decoded
+}
+
+function decodeScriptPubKeyInner(
   script: Uint8Array,
   network: TransactionNetwork = 'mainnet'
 ): DecodedScript {

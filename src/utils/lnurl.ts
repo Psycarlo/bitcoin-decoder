@@ -1,15 +1,17 @@
 import { bech32 } from '@scure/base'
 import type { ParsedDestination } from '../types'
 import { DecodeError } from '../types'
+import { normalizeDestinationValue } from './normalize'
 
 const LNURL_PREFIX = 'lnurl'
 const FETCH_TIMEOUT_MS = 5000
 
 async function lnurl(input: string): Promise<ParsedDestination> {
+  const normalized = normalizeDestinationValue(input)
   let words: number[]
 
   try {
-    const decoded = bech32.decode(input as `${string}1${string}`, 2000)
+    const decoded = bech32.decode(normalized as `${string}1${string}`, 2000)
 
     if (decoded.prefix !== LNURL_PREFIX) {
       throw new DecodeError(
@@ -55,7 +57,7 @@ async function lnurl(input: string): Promise<ParsedDestination> {
 
   return {
     destination: {
-      value: input,
+      value: normalized,
       protocol: 'lightning',
       type: 'lnurl'
     }

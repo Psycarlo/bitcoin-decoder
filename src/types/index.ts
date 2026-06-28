@@ -192,6 +192,8 @@ export type DecodedNostr = {
   kind: 'nostr'
   /** Raw text passed by the user */
   input: string
+  /** Lowercase NIP-19 bech32 encoding */
+  encoded: string
   /** Decoded NIP-19 entity */
   entity: NostrEntity
 }

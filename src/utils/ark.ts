@@ -1,17 +1,19 @@
 import { bech32m } from '@scure/base'
 import type { ParsedDestination } from '../types'
 import { DecodeError } from '../types'
+import { normalizeDestinationValue } from './normalize'
 
 const ARK_PREFIXES = ['ark', 'tark']
 const VALID_VERSIONS = [0, 1]
 const MIN_PAYLOAD_LENGTH = 4
 
 function validate(input: string): void {
+  const normalized = normalizeDestinationValue(input)
   let prefix: string
   let words: number[]
 
   try {
-    const decoded = bech32m.decode(input as `${string}1${string}`, 1023)
+    const decoded = bech32m.decode(normalized as `${string}1${string}`, 1023)
     prefix = decoded.prefix
     words = decoded.words
   } catch (error) {
@@ -46,7 +48,7 @@ function ark(input: string): ParsedDestination {
 
   return {
     destination: {
-      value: input,
+      value: normalizeDestinationValue(input),
       protocol: 'ark',
       type: 'ark-address'
     }

@@ -1,5 +1,6 @@
 import { bech32, hex, utf8 } from '@scure/base'
 import type { ParsedDestination } from '../types'
+import { normalizeDestinationValue } from './normalize'
 
 const BECH32_ALPHABET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l'
 
@@ -183,7 +184,7 @@ function parse(decodedOffer: DecodedOffer): ParsedDestination {
 
   return {
     destination: {
-      value: decodedOffer.offerRequest,
+      value: normalizeDestinationValue(decodedOffer.offerRequest),
       protocol: 'lightning',
       type: 'bolt12'
     },

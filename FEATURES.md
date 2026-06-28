@@ -11,6 +11,14 @@ What `bitcoin-decoder` can currently decode.
 - [x] P2TR addresses (bech32m, witness v1)
 - [x] Future witness versions v2–v16 (bech32m, 2–40 byte program)
 
+## Destination normalization
+
+- [x] Bech32 payment strings return lowercase in `destination.value`
+- [x] NIP-19 inputs return lowercase in `encoded`
+- [x] Lightning addresses (`user@domain`) return lowercase
+- [x] Legacy base58 on-chain addresses and extended keys preserve input casing
+- [x] Transaction ids and in-tx addresses return lowercase hex / normalized bech32
+
 ## Lightning
 
 - [x] BOLT11 invoices (`lnbc`, `lntb`, `lntbs`, `lnbcrt`)

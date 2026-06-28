@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Bech32-encoded destination values return lowercase in `destination.value` and `encoded` (NIP-19). Lightning addresses are lowercased. Legacy base58 and extended keys preserve input casing. Transaction ids and tx hex fields use lowercase.
+
 ## [0.7.0] - 2026-06-27
 
 ### Added
