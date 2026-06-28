@@ -11,13 +11,7 @@ const BECH32_DESTINATION_PREFIXES = [
   'lnbcrt',
   'lno1',
   'lnbcrto1',
-  'lnto1',
-  'npub1',
-  'nsec1',
-  'note1',
-  'nprofile1',
-  'nevent1',
-  'naddr1'
+  'lnto1'
 ] as const
 
 const LEGACY_BITCOIN_PREFIX = /^[13mn2]/
