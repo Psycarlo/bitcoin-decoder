@@ -11,6 +11,14 @@ What `bitcoin-decoder` can currently decode.
 - [x] P2TR addresses (bech32m, witness v1)
 - [x] Future witness versions v2–v16 (bech32m, 2–40 byte program)
 
+## Destination normalization
+
+- [x] Bech32 payment strings return lowercase in `destination.value`
+- [x] NIP-19 inputs return lowercase in `encoded`
+- [x] Lightning addresses (`user@domain`) return lowercase
+- [x] Legacy base58 on-chain addresses and extended keys preserve input casing
+- [x] Transaction ids and in-tx addresses return lowercase hex / normalized bech32
+
 ## Lightning
 
 - [x] BOLT11 invoices (`lnbc`, `lntb`, `lntbs`, `lnbcrt`)
@@ -23,6 +31,24 @@ What `bitcoin-decoder` can currently decode.
 ## Ark
 
 - [x] Ark addresses (`ark1...` mainnet, `tark1...` testnet, versions 0 and 1)
+
+## VTXO (bark)
+
+- [x] Bark VTXO blobs, hex-encoded (`decodeVtxo(hex)`, or `decode(hex, { vtxo: {} })`)
+- [x] Encoding version 2 only — version 1 is rejected with `UNSUPPORTED_VTXO_VERSION`
+- [x] Header: amount, expiry height, server pubkey, exit delta, anchor outpoint, point, `vtxoId`
+- [x] All 4 genesis transitions: `cosigned`, `arkoor`, `hash-locked-cosigned`, `hash-locked-cosigned-v1`
+- [x] All 12 policies: `pubkey`, `checkpoint`, `expiry`, `server-owned`, HTLC send/receive (v0 + v1), hArk leaf/forfeit (v0 + v1)
+- [x] Per-level signing status via the all-zero signature sentinel; `isFullySigned`
+- [x] Full exit-chain reconstruction: MuSig2 (BIP-327) key aggregation, taproot tweaking, tapscript leaves, per-level txid and hex
+- [x] Derived: `totalFees`, `chainDepth`, `isVirtualUtxo`
+- [x] Structural validation: output index bounds, empty genesis, taptweak scalar, trailing bytes, truncation
+- [x] Offline — no network calls, no CSPRNG (works in React Native without polyfills)
+- [x] Network-agnostic: mainnet, signet and regtest VTXOs share one encoding
+- [x] `kind: 'vtxo'` result; errors `INVALID_VTXO`, `UNSUPPORTED_VTXO_VERSION`
+
+Verified against bark's own deterministic test vectors: every reconstructed
+exit chain terminates at the VTXO's encoded `point`.
 
 ## Unified URIs
 

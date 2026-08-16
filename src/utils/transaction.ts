@@ -12,6 +12,7 @@ import type {
   TxStatus
 } from '../types'
 import { DecodeError } from '../types'
+import { normalizeDestinationValue, normalizeHex } from './normalize'
 
 const TXID_REGEX = /^[0-9a-f]{64}$/i
 const DEFAULT_TIMEOUT_MS = 5000
@@ -131,7 +132,9 @@ function scriptTypeToAddressType(
 function mapPrevout(prevout: EsploraPrevout): TxPrevout {
   const scriptPubKeyType = normalizeScriptType(prevout.scriptpubkey_type)
   return {
-    address: prevout.scriptpubkey_address,
+    address: prevout.scriptpubkey_address
+      ? normalizeDestinationValue(prevout.scriptpubkey_address)
+      : undefined,
     addressType: scriptTypeToAddressType(scriptPubKeyType),
     value: prevout.value,
     scriptPubKeyType
@@ -141,7 +144,7 @@ function mapPrevout(prevout: EsploraPrevout): TxPrevout {
 function mapVin(vin: EsploraVin): TxInput {
   const isCoinbase = Boolean(vin.is_coinbase)
   return {
-    txid: vin.txid,
+    txid: normalizeHex(vin.txid),
     vout: vin.vout,
     prevout: vin.prevout ? mapPrevout(vin.prevout) : undefined,
     sequence: vin.sequence,
@@ -153,7 +156,9 @@ function mapVin(vin: EsploraVin): TxInput {
 function mapVout(vout: EsploraVout): TxOutput {
   const scriptPubKeyType = normalizeScriptType(vout.scriptpubkey_type)
   return {
-    address: vout.scriptpubkey_address,
+    address: vout.scriptpubkey_address
+      ? normalizeDestinationValue(vout.scriptpubkey_address)
+      : undefined,
     addressType: scriptTypeToAddressType(scriptPubKeyType),
     value: vout.value,
     scriptPubKeyType

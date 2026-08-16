@@ -21,12 +21,15 @@ export const bitcoinAddresses = {
     },
     p2wsh: {
       valid: 'bc10qyp40l5u7z6zvx055lnyxrqnl3wkwcpjpdtsmkx9mq',
+      uppercase: 'BC10QYP40L5U7Z6ZVX055LNYXRQNL3WKWCPJPDTSMKX9MQ',
       invalid: {
         checksum: 'bc10qyp40l5u7z6zvx055lnyxrqnl3wkwcpjpdtsmkx9mb'
       }
     },
     p2tr: {
       valid: 'bc1p00000000xxxhdqfw0zgkc0h00u9702naqf3k98kw554epmmkannqlvr5n0',
+      uppercase:
+        'BC1P00000000XXXHDQFW0ZGKC0H00U9702NAQF3K98KW554EPMMKANNQLVR5N0',
       invalid: {
         checksum:
           'bc1p00000000xxxhdqfw0zgkc0h00u9702naqf3k98kw554epmmkannqlvr5n1',
@@ -49,6 +52,7 @@ export const bitcoinAddresses = {
     },
     p2wpkh: {
       valid: 'tb1qur637t05mfk6483kpxtvqufxdz54mg0et6hs8n',
+      uppercase: 'TB1QUR637T05MFK6483KPXTVQUFXDZ54MG0ET6HS8N',
       invalid: {
         checksum: 'tb1qur637t05mfk6483kpxtvqufxdz54mg0et6hs8d'
       }
@@ -56,6 +60,9 @@ export const bitcoinAddresses = {
     p2wsh: {},
     p2tr: {
       valid: 'tb1p0000ctmd96wsfakv098sxm9vmm9nu4zjadw8fw84j3zt8fa0kmzqpyqkc8',
+      uppercase:
+        'TB1P0000CTMD96WSFAKV098SXM9VMM9NU4ZJADW8FW84J3ZT8FA0KMZQPYQKC8',
+      issue6: 'TB1PWQJCRXKP6Q2WDYVFRSJ5DKY9RLUAR99M6JEJ4NCKCPJ9C56TYVVQASAYDG',
       invalid: {
         checksum:
           'tb1p0000ctmd96wsfakv098sxm9vmm9nu4zjadw8fw84j3zt8fa0kmzqpyqkc7'
@@ -92,13 +99,18 @@ export const bitcoinAddresses = {
       valid: '2N22oYH5ocP5L9ebTGGHh8tHf6cnBCqxrAn'
     },
     p2wpkh: {
-      valid: 'bcrt1qdfvpr5kj8wfm8ee8jhkhfux9dwp66cavld2nqe'
+      valid: 'bcrt1qdfvpr5kj8wfm8ee8jhkhfux9dwp66cavld2nqe',
+      uppercase: 'BCRT1QDFVPR5KJ8WFM8EE8JHKHFUX9DWP66CAVLD2NQE'
     },
     p2wsh: {
-      valid: 'bcrt1qed5wxnx0spa94c8cq9aqfem5ky3cqps5kqnpjs24t69ejvcqhrvsyezduv'
+      valid: 'bcrt1qed5wxnx0spa94c8cq9aqfem5ky3cqps5kqnpjs24t69ejvcqhrvsyezduv',
+      uppercase:
+        'BCRT1QED5WXNX0SPA94C8CQ9AQFEM5KY3CQPS5KQNPJS24T69EJVCQHRVSYEZDUV'
     },
     p2tr: {
-      valid: 'bcrt1pspfm8tpmp66sj3783k5n4el99j69my3qpfd8c9aczftx7jttpk5qp7earw'
+      valid: 'bcrt1pspfm8tpmp66sj3783k5n4el99j69my3qpfd8c9aczftx7jttpk5qp7earw',
+      uppercase:
+        'BCRT1PSPFM8TPMP66SJ3783K5N4EL99J69MY3QPFD8C9ACZFTX7JTTPK5QP7EARW'
     }
   }
 }

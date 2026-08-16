@@ -58,6 +58,8 @@ export type ErrorCode =
   | 'TX_TIMEOUT'
   | 'INVALID_EXTENDED_KEY'
   | 'INVALID_PSBT'
+  | 'INVALID_VTXO'
+  | 'UNSUPPORTED_VTXO_VERSION'
 
 export type NostrProfile = {
   name?: string
@@ -148,6 +150,9 @@ export type DecodeOptions = {
   nostr?: NostrDecodeOptions
   transaction?: TransactionDecodeOptions
   psbt?: PsbtDecodeOptions
+  /** Opt in to VTXO detection. VTXOs are bare hex with no prefix or magic
+   *  bytes, so `decode` only sniffs for them when this is present. */
+  vtxo?: VtxoDecodeOptions
 }
 
 export type ParsedLNAddress = {
@@ -192,6 +197,8 @@ export type DecodedNostr = {
   kind: 'nostr'
   /** Raw text passed by the user */
   input: string
+  /** Lowercase NIP-19 bech32 encoding */
+  encoded: string
   /** Decoded NIP-19 entity */
   entity: NostrEntity
 }
@@ -401,12 +408,153 @@ export type DecodedPsbt = {
   data: PsbtData
 }
 
+/** A transaction output inside a VTXO exit transaction. */
+export type VtxoTxOut = {
+  /** Amount in sats */
+  value: number
+  /** Raw scriptPubKey as hex. */
+  scriptPubKey: string
+}
+
+/** The transition from one exit transaction to the next.
+ *
+ *  `cosigned` covers round-tree nodes, `arkoor` covers off-chain sends, and
+ *  the hash-locked variants back lightning HTLCs.
+ */
+export type VtxoTransition =
+  | {
+      kind: 'cosigned'
+      /** Cosign keys, including the server's (which differs from its main key). */
+      pubkeys: string[]
+      /** Schnorr signature hex, or `null` when unsigned. */
+      signature: string | null
+    }
+  | {
+      kind: 'arkoor'
+      /** Client cosign keys. The server key is added during aggregation. */
+      clientCosigners: string[]
+      /** Taproot tweak applied to the aggregate key. */
+      tapTweak: string
+      signature: string | null
+    }
+  | {
+      kind: 'hash-locked-cosigned' | 'hash-locked-cosigned-v1'
+      userPubkey: string
+      signature: string | null
+      /** Revealed preimage, when the blob carries one. */
+      preimage: string | null
+      /** Preimage hash, when the preimage is still unknown. */
+      unlockHash: string | null
+    }
+
+/** The spending policy guarding a VTXO's output.
+ *
+ *  Names match bark's own `VtxoPolicyKind` display strings.
+ */
+export type VtxoPolicy =
+  | { kind: 'pubkey'; userPubkey: string }
+  | { kind: 'checkpoint'; userPubkey: string }
+  | { kind: 'server-owned' }
+  | { kind: 'expiry'; internalKey: string }
+  | {
+      kind: 'server-htlc-send' | 'server-htlc-send-v1'
+      userPubkey: string
+      paymentHash: string
+      htlcExpiry: number
+    }
+  | {
+      kind: 'server-htlc-receive' | 'server-htlc-receive-v1'
+      userPubkey: string
+      paymentHash: string
+      htlcExpiry: number
+      htlcExpiryDelta: number
+    }
+  | {
+      kind: 'hark-leaf' | 'hark-leaf-v1' | 'hark-forfeit' | 'hark-forfeit-v1'
+      userPubkey: string
+      unlockHash: string
+    }
+
+/** One level of the exit chain, as encoded. */
+export type VtxoGenesisItem = {
+  transition: VtxoTransition
+  /** Index of the output carrying the coin forward. */
+  outputIdx: number
+  /** Sibling outputs of the exit transaction. */
+  otherOutputs: VtxoTxOut[]
+  /** Fee assigned to this level's P2A anchor, in sats. */
+  feeAmount: number
+  /** Whether this level carries every witness needed to broadcast. */
+  isSigned: boolean
+}
+
+/** A reconstructed exit transaction. */
+export type VtxoExitStep = {
+  /** Transaction id of the rebuilt exit transaction. */
+  txid: string
+  /** Non-witness serialization as hex. */
+  hex: string
+  /** Output index carrying the coin forward. */
+  vout: number
+  /** Total value entering this transaction, in sats. */
+  inputAmount: number
+  /** Value carried forward to the next level, in sats. */
+  outputAmount: number
+  /** Fee on this level's P2A anchor, in sats. */
+  feeAmount: number
+  isSigned: boolean
+}
+
+export type VtxoData = {
+  /** Encoding version. Always 2 — earlier versions are rejected. */
+  version: number
+  /** `txid:vout` of this VTXO's own outpoint. */
+  vtxoId: string
+  /** Amount in sats */
+  amount: number
+  /** Block height at which the server may sweep the VTXO. */
+  expiryHeight: number
+  serverPubkey: string
+  /** Blocks the user must wait between exit steps. */
+  exitDelta: number
+  /** On-chain outpoint the exit chain is rooted at. */
+  anchorPoint: { txid: string; vout: number }
+  /** This VTXO's own outpoint. */
+  point: { txid: string; vout: number }
+  policy: VtxoPolicy
+  genesis: VtxoGenesisItem[]
+  /** Exit transactions, rooted at `anchorPoint`. Empty for a virtual UTXO. */
+  exitChain: VtxoExitStep[]
+  /** Sum of all genesis fee amounts, in sats. */
+  totalFees: number
+  /** Number of exit transactions needed to get on-chain. */
+  chainDepth: number
+  /** Whether every level carries all its witnesses. */
+  isFullySigned: boolean
+  /** True when the VTXO is a virtual representation of an on-chain UTXO. */
+  isVirtualUtxo: boolean
+}
+
+export type VtxoDecodeOptions = {
+  /** Reserved for future use. Passing `{}` opts `decode` into VTXO sniffing. */
+  strict?: boolean
+}
+
+export type DecodedVtxo = {
+  valid: true
+  kind: 'vtxo'
+  /** Raw text passed by the user */
+  input: string
+  data: VtxoData
+}
+
 export type DecodedData =
   | DecodedPayment
   | DecodedNostr
   | DecodedTransaction
   | DecodedKey
   | DecodedPsbt
+  | DecodedVtxo
   | DecodedError
 
 export class DecodeError extends Error {

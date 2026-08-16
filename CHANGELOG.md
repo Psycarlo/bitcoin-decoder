@@ -5,6 +5,24 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-08-16
+
+### Added
+
+- Bark VTXO decoding (encoding version 2) from hex, returned as `DecodedVtxo { kind: 'vtxo', data: VtxoData }`, including full exit-chain reconstruction. Offline, no network calls.
+- `decodeVtxo(hex)` and `isVtxo(input)` exports. `decode()` only detects VTXOs when `opts.vtxo` is passed.
+- `DecodeOptions` accepts new optional `vtxo` field (backwards compatible).
+- Error codes `INVALID_VTXO` and `UNSUPPORTED_VTXO_VERSION`.
+- Public exports: `DecodedVtxo`, `VtxoData`, `VtxoPolicy`, `VtxoTransition`, `VtxoGenesisItem`, `VtxoExitStep`, `VtxoTxOut`, `VtxoDecodeOptions`.
+- `@noble/curves` runtime dependency.
+- `DecodedNostr.encoded`: the lowercase NIP-19 bech32 encoding of the input. Thanks [@David-glitc](https://github.com/David-glitc).
+
+### Changed
+
+- Bech32-encoded destination values return lowercase in `destination.value`. Lightning addresses are lowercased. Legacy base58 addresses and extended keys preserve input casing. Transaction ids and tx hex fields use lowercase. Thanks [@David-glitc](https://github.com/David-glitc) ([#6](https://github.com/Psycarlo/bitcoin-decoder/issues/6)).
+- `DecodedData` union now includes `DecodedVtxo`.
+- Dependencies bumped: `@noble/hashes` to `^2.3.0`, `@scure/base` to `^2.3.0`, `bip-321` to `^0.0.11`, `nostr-tools` to `^2.24.2`.
+
 ## [0.7.0] - 2026-06-27
 
 ### Added
