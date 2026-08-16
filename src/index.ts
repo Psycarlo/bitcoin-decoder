@@ -13,6 +13,7 @@ import { NOSTR_PREFIXES, nostr } from './utils/nostr'
 import { fetchProfile } from './utils/nostr-profile'
 import { isPsbt, psbt } from './utils/psbt'
 import { fetchTransactionData, isTxId } from './utils/transaction'
+import { isVtxo, vtxo } from './utils/vtxo'
 
 const BIP321_PREFIX = 'bitcoin:'
 const LIGHTNING_PREFIX = 'lightning:'
@@ -266,6 +267,11 @@ async function decode(
     if (isPsbt(input)) {
       return { valid: true, kind: 'psbt', input, data: psbt(input, opts.psbt) }
     }
+    // VTXOs are bare hex with no prefix or magic bytes, so they are only
+    // sniffed when the caller opts in. `decodeVtxo` is always available.
+    if (opts.vtxo && isVtxo(input)) {
+      return { valid: true, kind: 'vtxo', input, data: vtxo(input) }
+    }
     if (isTxId(input)) {
       const txid = input.toLowerCase()
       if (!opts.transaction?.fetch) {
@@ -291,6 +297,7 @@ export type {
   DecodedPayment,
   DecodedPsbt,
   DecodedTransaction,
+  DecodedVtxo,
   DecodeOptions,
   Destination,
   ExtendedKey,
@@ -316,6 +323,14 @@ export type {
   TxOutput,
   TxPrevout,
   TxStatus,
+  VtxoData,
+  VtxoDecodeOptions,
+  VtxoExitStep,
+  VtxoGenesisItem,
+  VtxoPolicy,
+  VtxoTransition,
+  VtxoTxOut,
   WellKnown
 } from './types'
 export { wellKnown } from './utils/lightning-address'
+export { isVtxo, vtxo as decodeVtxo } from './utils/vtxo'
