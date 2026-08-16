@@ -21,8 +21,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "bun test tests/index.test.ts tests/normalize.test.ts tests/vtxo.test.ts",
-    "test:coverage": "bun test --coverage",
+    "test": "bun test --path-ignore-patterns=\"**/live.test.ts\"",
+    "test:coverage": "bun test --coverage --path-ignore-patterns=\"**/live.test.ts\"",
     "test:live": "bun test tests/live.test.ts",
     "type-check": "tsc --noEmit",
     "check": "ultracite check",
