@@ -15,10 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Error codes `INVALID_VTXO` and `UNSUPPORTED_VTXO_VERSION`.
 - Public exports: `DecodedVtxo`, `VtxoData`, `VtxoPolicy`, `VtxoTransition`, `VtxoGenesisItem`, `VtxoExitStep`, `VtxoTxOut`, `VtxoDecodeOptions`.
 - `@noble/curves` runtime dependency.
+- `DecodedNostr.encoded`: the lowercase NIP-19 bech32 encoding of the input. Thanks [@David-glitc](https://github.com/David-glitc).
 
 ### Changed
 
-- Bech32-encoded destination values return lowercase in `destination.value` and `encoded` (NIP-19). Lightning addresses are lowercased. Legacy base58 and extended keys preserve input casing. Transaction ids and tx hex fields use lowercase.
+- Bech32-encoded destination values return lowercase in `destination.value`. Lightning addresses are lowercased. Legacy base58 addresses and extended keys preserve input casing. Transaction ids and tx hex fields use lowercase. Thanks [@David-glitc](https://github.com/David-glitc) ([#6](https://github.com/Psycarlo/bitcoin-decoder/issues/6)).
 - `DecodedData` union now includes `DecodedVtxo`.
 - Dependencies bumped: `@noble/hashes` to `^2.3.0`, `@scure/base` to `^2.3.0`, `bip-321` to `^0.0.11`, `nostr-tools` to `^2.24.2`.
 
