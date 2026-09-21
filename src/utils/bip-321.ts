@@ -85,10 +85,19 @@ async function mapPaymentMethod(
   return { ...parsed, metadata }
 }
 
-async function parse(result: BIP321ParseResult): Promise<ParsedDestination[]> {
+type ParseOutcome = {
+  destinations: ParsedDestination[]
+  failures: string[]
+}
+
+function reasonToMessage(reason: unknown): string {
+  return reason instanceof Error ? reason.message : String(reason)
+}
+
+async function parse(result: BIP321ParseResult): Promise<ParseOutcome> {
   const metadata = getMetadata(result)
 
-  return await Promise.all(
+  const settled = await Promise.allSettled(
     result.paymentMethods
       .filter(
         (method): method is PaymentMethod & { type: SupportedPaymentType } =>
@@ -100,20 +109,35 @@ async function parse(result: BIP321ParseResult): Promise<ParsedDestination[]> {
       .sort((a, b) => PROTOCOL_PRIORITY[a.type] - PROTOCOL_PRIORITY[b.type])
       .map((method) => mapPaymentMethod(method, metadata))
   )
+
+  const destinations: ParsedDestination[] = []
+  const failures: string[] = []
+
+  for (const outcome of settled) {
+    if (outcome.status === 'fulfilled') {
+      destinations.push(outcome.value)
+    } else {
+      failures.push(reasonToMessage(outcome.reason))
+    }
+  }
+
+  return { destinations, failures }
 }
 
 async function bip321(input: string): Promise<ParsedDestination[]> {
   const result = parseBIP321(input)
 
-  // parse() already drops invalid/unsupported rails, so a single bad rail must
-  // not reject the whole URI. Only fail when no usable method remains.
-  const parsed = await parse(result)
+  // A rail that fails to resolve must not take the URI down with it: a
+  // multi-rail URI stays payable over whichever rail survived. Only fail when
+  // none does.
+  const { destinations, failures } = await parse(result)
 
-  if (parsed.length === 0) {
-    throw new Error(`Invalid BIP-321 URI: ${result.errors.join(', ')}`)
+  if (destinations.length === 0) {
+    const errors = [...result.errors, ...failures]
+    throw new Error(`Invalid BIP-321 URI: ${errors.join(', ')}`)
   }
 
-  return parsed
+  return destinations
 }
 
 export { bip321 }

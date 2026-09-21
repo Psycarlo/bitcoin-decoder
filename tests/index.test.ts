@@ -414,6 +414,60 @@ describe('Bitcoin Decode', () => {
       expect(result.destination.protocol).toBe('lightning')
       expect(result.network).toBe('mainnet')
     })
+
+    describe('unresolvable rails', () => {
+      const onchain = bitcoinAddresses.mainnet.p2tr.valid
+
+      afterEach(() => {
+        spyOn(globalThis, 'fetch').mockRestore()
+      })
+
+      it('should keep the on-chain rail when the lightning address is unreachable', async () => {
+        spyOn(globalThis, 'fetch').mockRejectedValue(
+          new TypeError('Failed to fetch')
+        )
+        const input = `bitcoin:${onchain}?lightning=user@example.com`
+
+        const result = await decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid || result.kind !== 'payment') {
+          return
+        }
+        expect(result.destinations).toHaveLength(1)
+        expect(result.destinations[0]?.type).toBe('bitcoin-address')
+      })
+
+      it('should keep the on-chain rail when the lightning address is not found', async () => {
+        spyOn(globalThis, 'fetch').mockResolvedValue(
+          Response.json({ tag: 'payRequest' })
+        )
+        const input = `bitcoin:${onchain}?lightning=user@example.com`
+
+        const result = await decode(input)
+
+        expect(result.valid).toBe(true)
+        if (!result.valid || result.kind !== 'payment') {
+          return
+        }
+        expect(result.destinations).toHaveLength(1)
+        expect(result.destinations[0]?.type).toBe('bitcoin-address')
+      })
+
+      it('should still fail when no rail resolves', async () => {
+        spyOn(globalThis, 'fetch').mockRejectedValue(
+          new TypeError('Failed to fetch')
+        )
+
+        const result = await decode('bitcoin:?lightning=user@example.com')
+
+        expect(result.valid).toBe(false)
+        if (result.valid) {
+          return
+        }
+        expect(result.errorMessage).toContain('Lightning address fetch failed')
+      })
+    })
   })
 
   describe('Bitcoin addresses', () => {
