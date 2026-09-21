@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-09-21
+
+### Added
+
+- Error code `LNADDRESS_UNREACHABLE`, distinguishing a well-known endpoint that could not be reached from an address that does not exist.
+
+### Fixed
+
+- Lightning address resolution no longer sends a `Content-Type` header on its bodyless GET; the CORS preflight it triggered was rejected by hosts serving only GET on `/.well-known/lnurlp/`.
+- Multi-rail BIP-321 URIs no longer rejected when one rail fails to resolve; only resolvable rails are kept.
+
 ## [0.8.0] - 2026-08-16
 
 ### Added
