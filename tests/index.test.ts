@@ -189,6 +189,83 @@ describe('Bitcoin Decode', () => {
         expect(result).toBeNull()
       })
     })
+
+    describe('well-known request', () => {
+      const payRequest = {
+        tag: 'payRequest',
+        callback: 'https://example.com/api/lnurlp/user/',
+        minSendable: 1000,
+        maxSendable: 100_000_000
+      }
+
+      afterEach(() => {
+        spyOn(globalThis, 'fetch').mockRestore()
+      })
+
+      it('should send no request headers, so no CORS preflight is triggered', async () => {
+        const fetchSpy = spyOn(globalThis, 'fetch').mockResolvedValue(
+          Response.json(payRequest)
+        )
+
+        await decode('user@example.com')
+
+        const init = fetchSpy.mock.calls[0]?.[1]
+        expect(init?.method).toBe('GET')
+        expect(init?.headers).toBeUndefined()
+      })
+
+      it('should report an unreachable host as LNADDRESS_UNREACHABLE', async () => {
+        spyOn(globalThis, 'fetch').mockRejectedValue(
+          new TypeError('Failed to fetch')
+        )
+
+        const result = await decode('user@example.com')
+
+        expect(result.valid).toBe(false)
+        if (result.valid) {
+          return
+        }
+        expect(result.errorCode).toBe('LNADDRESS_UNREACHABLE')
+      })
+
+      it('should report a timeout as LNADDRESS_UNREACHABLE', async () => {
+        const timeout = new Error('The operation timed out')
+        timeout.name = 'TimeoutError'
+        spyOn(globalThis, 'fetch').mockRejectedValue(timeout)
+
+        const result = await decode('user@example.com')
+
+        expect(result.valid).toBe(false)
+        if (result.valid) {
+          return
+        }
+        expect(result.errorCode).toBe('LNADDRESS_UNREACHABLE')
+      })
+
+      it('should report a reachable host with a bad payload as INVALID_LNADDRESS', async () => {
+        spyOn(globalThis, 'fetch').mockResolvedValue(
+          Response.json({ tag: 'payRequest' })
+        )
+
+        const result = await decode('user@example.com')
+
+        expect(result.valid).toBe(false)
+        if (result.valid) {
+          return
+        }
+        expect(result.errorCode).toBe('INVALID_LNADDRESS')
+      })
+
+      it('should resolve to null from wellKnown when the host is unreachable', async () => {
+        spyOn(globalThis, 'fetch').mockRejectedValue(
+          new TypeError('Failed to fetch')
+        )
+
+        const result = await wellKnown('user@example.com')
+
+        expect(result).toBeNull()
+      })
+    })
   })
 
   describe('Payment request', () => {

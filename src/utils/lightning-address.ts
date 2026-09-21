@@ -4,8 +4,6 @@ import { DecodeError } from '../types'
 const BASE_URL = 'https://'
 const FETCH_TIMEOUT_MS = 5000
 
-const headers = { 'Content-Type': 'application/json' }
-
 function parse(input: string): ParsedLNAddress {
   const atIndex = input.indexOf('@')
 
@@ -32,13 +30,61 @@ function parse(input: string): ParsedLNAddress {
   }
 }
 
+function endpoint(parsed: ParsedLNAddress): string {
+  return `${BASE_URL}${parsed.domain}/.well-known/lnurlp/${parsed.username}`
+}
+
+// No request headers: a `Content-Type` on a bodyless GET makes the request
+// non-simple, and the CORS preflight it triggers is rejected by hosts that
+// only implement GET on the well-known path.
+async function fetchWellKnown(url: string): Promise<WellKnown | null> {
+  let response: Response
+  try {
+    response = await fetch(url, {
+      method: 'GET',
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS)
+    })
+  } catch (error) {
+    if (error instanceof Error && error.name === 'TimeoutError') {
+      throw new DecodeError(
+        `Lightning address request timed out after ${FETCH_TIMEOUT_MS}ms`,
+        'LNADDRESS_UNREACHABLE'
+      )
+    }
+    const message =
+      error instanceof Error ? error.message : 'Unknown network error'
+    throw new DecodeError(
+      `Lightning address fetch failed: ${message}`,
+      'LNADDRESS_UNREACHABLE'
+    )
+  }
+
+  let json: Record<string, unknown>
+  try {
+    json = (await response.json()) as Record<string, unknown>
+  } catch {
+    return null
+  }
+
+  const { callback, minSendable, maxSendable, commentAllowed, metadata } = json
+
+  if (!(callback && minSendable && maxSendable)) {
+    return null
+  }
+
+  return {
+    callback,
+    minSendable,
+    maxSendable,
+    commentAllowed,
+    metadata
+  } as WellKnown
+}
+
 async function lightningAddress(input: string): Promise<ParsedDestination> {
   const parsed = parse(input)
   const value = `${parsed.username}@${parsed.domain}`
-  const result = await wellKnown(
-    `${BASE_URL}${parsed.domain}/.well-known/lnurlp/${parsed.username}`,
-    false
-  )
+  const result = await fetchWellKnown(endpoint(parsed))
 
   if (!result) {
     throw new DecodeError(
@@ -56,6 +102,8 @@ async function lightningAddress(input: string): Promise<ParsedDestination> {
   }
 }
 
+// Resolves to `null` for anything that is not a usable payRequest, including
+// an unreachable host. Use `lightningAddress` to tell those cases apart.
 async function wellKnown(
   lnaddress: string,
   needsParse = true
@@ -64,43 +112,14 @@ async function wellKnown(
 
   if (needsParse) {
     try {
-      const parsed = parse(lnaddress)
-      url = `${BASE_URL}${parsed.domain}/.well-known/lnurlp/${parsed.username}`
+      url = endpoint(parse(lnaddress))
     } catch {
       return null
     }
   }
 
   try {
-    const response = await fetch(url, {
-      headers,
-      method: 'GET',
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS)
-    })
-    const json = (await response.json()) as Record<string, unknown>
-
-    const { callback, minSendable, maxSendable, commentAllowed, metadata } =
-      json
-
-    if (!callback) {
-      return null
-    }
-
-    if (!minSendable) {
-      return null
-    }
-
-    if (!maxSendable) {
-      return null
-    }
-
-    return {
-      callback,
-      minSendable,
-      maxSendable,
-      commentAllowed,
-      metadata
-    } as WellKnown
+    return await fetchWellKnown(url)
   } catch {
     return null
   }
